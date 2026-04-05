@@ -30,6 +30,9 @@ public class RosterCategory {
 	private String raceName;
 	
 	@Column(nullable = false)
+	private boolean isMinus;
+	
+	@Column(nullable = false)
 	private short categoryValue;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
