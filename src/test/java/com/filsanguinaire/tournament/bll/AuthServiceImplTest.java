@@ -27,6 +27,9 @@ import com.filsanguinaire.tournament.dal.UserRepository;
 import com.filsanguinaire.tournament.dto.auth.AuthResponseDTO;
 import com.filsanguinaire.tournament.dto.auth.LoginDTO;
 import com.filsanguinaire.tournament.dto.auth.RegisterDTO;
+import com.filsanguinaire.tournament.exceptions.EmailAlreadyExistsException;
+import com.filsanguinaire.tournament.exceptions.PseudoAlreadyExistsException;
+import com.filsanguinaire.tournament.exceptions.UserNotFoundException;
 import com.filsanguinaire.tournament.security.JwtService;
 
 import jakarta.servlet.http.HttpServletResponse;

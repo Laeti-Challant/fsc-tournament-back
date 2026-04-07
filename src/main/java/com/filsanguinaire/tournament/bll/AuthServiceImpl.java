@@ -11,11 +11,15 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.filsanguinaire.tournament.bo.Role;
 import com.filsanguinaire.tournament.bo.User;
 import com.filsanguinaire.tournament.dal.UserRepository;
 import com.filsanguinaire.tournament.dto.auth.AuthResponseDTO;
 import com.filsanguinaire.tournament.dto.auth.LoginDTO;
 import com.filsanguinaire.tournament.dto.auth.RegisterDTO;
+import com.filsanguinaire.tournament.exceptions.EmailAlreadyExistsException;
+import com.filsanguinaire.tournament.exceptions.PseudoAlreadyExistsException;
+import com.filsanguinaire.tournament.exceptions.UserNotFoundException;
 import com.filsanguinaire.tournament.security.JwtService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -51,7 +55,7 @@ public class AuthServiceImpl implements IAuthService {
                 .pseudo(dto.getPseudo())
                 // Hashage du mot de passe
                 .passwordHash(passwordEncoder.encode(dto.getPassword()))
-                // Rôle PLAYER par défaut
+                .role(Role.PLAYER)
                 .build();
 
         // Sauvegarde en base
