@@ -56,6 +56,7 @@ public class AuthServiceImpl implements IAuthService {
                 // Hashage du mot de passe
                 .passwordHash(passwordEncoder.encode(dto.getPassword()))
                 .role(Role.PLAYER)
+                .active(true)
                 .build();
 
         // Sauvegarde en base

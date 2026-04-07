@@ -44,6 +44,7 @@ public class User {
 	@Column(nullable = false)
 	private Role role = Role.PLAYER;
 	
+	@Builder.Default
 	private boolean active = true;
 	
 	private LocalDateTime lastLogin;
