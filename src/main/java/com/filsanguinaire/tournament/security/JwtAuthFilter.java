@@ -12,6 +12,11 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.filsanguinaire.tournament.bll.IUserService;
+import com.filsanguinaire.tournament.bll.UserServiceImpl;
+import com.filsanguinaire.tournament.bo.User;
+import com.filsanguinaire.tournament.dal.UserRepository;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -25,6 +30,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 	private final JwtService jwtService;
+	
+	private final UserRepository userRepository;
 
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
@@ -50,16 +57,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 	    final String mail = jwtService.extractMail(jwt);
 
 	    if (mail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-	        if (jwtService.isTokenValid(jwt, mail)) {
-	            String role = jwtService.extractRole(jwt);
-	            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(mail, null,
-	                    List.of(new SimpleGrantedAuthority("ROLE_" + role)));
-	            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-	            SecurityContextHolder.getContext().setAuthentication(authToken);
-	            log.debug("JWT valide pour : {} avec role : {}", mail, role);
-	        } else {
-	            log.warn("JWT invalide ou expire pour : {}", mail);
-	        }
+	    	if (jwtService.isTokenValid(jwt, mail)) {
+	    	    User user = userRepository.findByEmail(mail).orElse(null);
+	    	    
+	    	    if (user != null) {
+	    	        UserPrincipal userPrincipal = new UserPrincipal(user);
+	    	        
+	    	        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+	    	                userPrincipal,
+	    	                null,
+	    	                userPrincipal.getAuthorities()
+	    	        );
+	    	        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+	    	        SecurityContextHolder.getContext().setAuthentication(authToken);
+	    	        log.debug("JWT valide pour : {} avec role : {}", mail, userPrincipal.getAuthorities());
+	    	    }
+	    	}
 	    }
 	    filterChain.doFilter(request, response);
 	}
