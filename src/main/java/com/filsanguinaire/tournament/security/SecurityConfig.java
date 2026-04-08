@@ -18,6 +18,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -37,6 +38,11 @@ public class SecurityConfig {
 
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.exceptionHandling(ex -> ex
+				        .authenticationEntryPoint((request, response, authException) -> 
+				            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Non authentifié")
+				        )
+				    )
 				.authorizeHttpRequests(auth -> auth
 					    // Swagger
 					    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
