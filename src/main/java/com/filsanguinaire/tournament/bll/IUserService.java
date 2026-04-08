@@ -10,11 +10,13 @@ import com.filsanguinaire.tournament.dto.user.UserUpdateEmailDTO;
 import com.filsanguinaire.tournament.dto.user.UserUpdatePasswordDTO;
 import com.filsanguinaire.tournament.dto.user.UserUpdatePseudoDTO;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 public interface IUserService extends UserDetailsService {
 
 	// ── Profil utilisateur connecté ──────────────────────────
     UserDTO getMe(String email);
-    UserDTO updateEmail(String email, UserUpdateEmailDTO dto);
+    UserDTO updateEmail(String email, UserUpdateEmailDTO dto, HttpServletResponse response);
     UserDTO updatePseudo(String email, UserUpdatePseudoDTO dto);
     UserDTO updatePassword(String email, UserUpdatePasswordDTO dto);
 

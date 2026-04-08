@@ -22,6 +22,7 @@ import com.filsanguinaire.tournament.dto.user.UserUpdatePasswordDTO;
 import com.filsanguinaire.tournament.dto.user.UserUpdatePseudoDTO;
 import com.filsanguinaire.tournament.security.UserPrincipal;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -40,8 +41,9 @@ public class UserController {
 	@PutMapping("/me/email")
     public ResponseEntity<UserDTO> updateEmail(
             @AuthenticationPrincipal UserPrincipal principal,
-            @Valid @RequestBody UserUpdateEmailDTO dto) {
-        return ResponseEntity.ok(userService.updateEmail(principal.getUsername(), dto));
+            @Valid @RequestBody UserUpdateEmailDTO dto,
+            HttpServletResponse response) {
+        return ResponseEntity.ok(userService.updateEmail(principal.getUsername(), dto, response));
     }
 
     @PutMapping("/me/pseudo")

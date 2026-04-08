@@ -17,8 +17,11 @@ import com.filsanguinaire.tournament.dto.user.UserUpdatePseudoDTO;
 import com.filsanguinaire.tournament.exceptions.EmailAlreadyExistsException;
 import com.filsanguinaire.tournament.exceptions.PseudoAlreadyExistsException;
 import com.filsanguinaire.tournament.exceptions.UserNotFoundException;
+import com.filsanguinaire.tournament.security.CookieService;
+import com.filsanguinaire.tournament.security.JwtService;
 import com.filsanguinaire.tournament.security.UserPrincipal;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,6 +33,10 @@ public class UserServiceImpl implements IUserService {
 	private final UserRepository userRepository;
 	
 	private final PasswordEncoder passwordEncoder;
+	
+	private final JwtService jwtService;
+	
+	private final CookieService cookieService;
 	
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -46,18 +53,23 @@ public class UserServiceImpl implements IUserService {
 	}
 
 	@Override
-	public UserDTO updateEmail(String email, UserUpdateEmailDTO dto) {
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
-		
-		// vérification que le nouvel email n'est pas déjà utilisé
-		if (userRepository.existsByEmail(dto.getEmail())) {
-			throw new EmailAlreadyExistsException(dto.getEmail());
-		}
-		
-		user.setEmail(dto.getEmail());
-		userRepository.save(user);
-		log.debug("Email mis à jour pour : {}", email);
-		return toDTO(user);
+	public UserDTO updateEmail(String email, UserUpdateEmailDTO dto, HttpServletResponse response) {
+	    User user = userRepository.findByEmail(email)
+	            .orElseThrow(() -> new UserNotFoundException(email));
+
+	    if (userRepository.existsByEmail(dto.getEmail())) {
+	        throw new EmailAlreadyExistsException(dto.getEmail());
+	    }
+
+	    user.setEmail(dto.getEmail());
+	    userRepository.save(user);
+
+	    // Nouveau cookie avec le nouvel email
+	    String newToken = jwtService.generateToken(dto.getEmail(), user.getRole().name());
+	    cookieService.addJwtCookie(response, newToken);
+
+	    log.debug("Email mis à jour pour : {} → {}", email, dto.getEmail());
+	    return toDTO(user);
 	}
 
 	@Override
