@@ -20,6 +20,7 @@ import com.filsanguinaire.tournament.dto.auth.RegisterDTO;
 import com.filsanguinaire.tournament.exceptions.EmailAlreadyExistsException;
 import com.filsanguinaire.tournament.exceptions.PseudoAlreadyExistsException;
 import com.filsanguinaire.tournament.exceptions.UserNotFoundException;
+import com.filsanguinaire.tournament.security.CookieService;
 import com.filsanguinaire.tournament.security.JwtService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,11 +33,12 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthServiceImpl implements IAuthService {
 
 	private final UserRepository userRepository;
+	
     private final PasswordEncoder passwordEncoder;
+    
     private final JwtService jwtService;
-
-    @Value("${app.cookie.secure}")
-    private boolean cookieSecure;
+    
+    private final CookieService cookieService;    
 
     @Override
     public AuthResponseDTO register(RegisterDTO dto, HttpServletResponse response) {
@@ -65,7 +67,7 @@ public class AuthServiceImpl implements IAuthService {
 
         // Génération du token et pose du cookie
         String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
-        addJwtCookie(response, token);
+        cookieService.addJwtCookie(response, token);
 
         return AuthResponseDTO.builder()
                 .pseudo(user.getPseudo())
@@ -97,7 +99,7 @@ public class AuthServiceImpl implements IAuthService {
 
         // Génération du token et pose du cookie
         String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
-        addJwtCookie(response, token);
+        cookieService.addJwtCookie(response, token);
 
         return AuthResponseDTO.builder()
                 .pseudo(user.getPseudo())
@@ -107,28 +109,10 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public void logout(HttpServletResponse response) {
-        // Suppression du cookie en le vidant avec maxAge 0
-        ResponseCookie cookie = ResponseCookie.from("jwt", "")
-                .httpOnly(true)
-                .secure(cookieSecure)
-                .path("/")
-                .maxAge(0)
-                .sameSite("Strict")
-                .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        cookieService.removeJwtCookie(response);
         log.debug("Déconnexion — cookie JWT supprimé");
     }
 
-    // Méthode privée réutilisable pour poser le cookie JWT
-    private void addJwtCookie(HttpServletResponse response, String token) {
-        ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                .httpOnly(true)
-                .secure(cookieSecure)
-                .path("/")
-                .maxAge(Duration.ofDays(1))
-                .sameSite("Strict")
-                .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-    }
+    
 
 }
