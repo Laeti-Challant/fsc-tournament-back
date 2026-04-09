@@ -15,6 +15,7 @@ import com.filsanguinaire.tournament.dto.user.UserUpdateEmailDTO;
 import com.filsanguinaire.tournament.dto.user.UserUpdatePasswordDTO;
 import com.filsanguinaire.tournament.dto.user.UserUpdatePseudoDTO;
 import com.filsanguinaire.tournament.exceptions.EmailAlreadyExistsException;
+import com.filsanguinaire.tournament.exceptions.IllegalOperationException;
 import com.filsanguinaire.tournament.exceptions.PseudoAlreadyExistsException;
 import com.filsanguinaire.tournament.exceptions.UserNotFoundException;
 import com.filsanguinaire.tournament.security.CookieService;
@@ -107,10 +108,15 @@ public class UserServiceImpl implements IUserService {
 	}
 
 	@Override
-	public UserDTO updateUserByAdmin(Long id, UserAdminUpdateDTO dto) {
+	public UserDTO updateUserByAdmin(Long id, UserAdminUpdateDTO dto, String currentUserEmail) {
 		User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("id: " + id));
-
+		
+		 // Empêcher l'admin de modifier son propre rôle
+	    if (user.getEmail().equals(currentUserEmail)) {
+	        throw new IllegalOperationException("Vous ne pouvez pas modifier votre propre compte.");
+	    }
+	    
         user.setRole(dto.getRole());
         user.setActive(dto.isActive());
         userRepository.save(user);
