@@ -9,7 +9,7 @@ import com.filsanguinaire.tournament.bo.Event;
 import com.filsanguinaire.tournament.bo.EventStatus;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
-	
+
 	// Trouver l'event IN_PROGRESS
 	Optional<Event> findFirstByStatusIn(List<EventStatus> statuses);
 	

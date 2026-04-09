@@ -15,7 +15,7 @@ public class AllowedInducementDTO {
     
     private String name;
     
-    private Integer minQty;
+    private short minQty;
     
-    private Integer maxQty;
+    private short maxQty;
 }
