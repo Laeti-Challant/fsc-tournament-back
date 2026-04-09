@@ -3,11 +3,11 @@ package com.filsanguinaire.tournament.bll;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.filsanguinaire.tournament.bo.Event;
 import com.filsanguinaire.tournament.bo.EventStatus;
 import com.filsanguinaire.tournament.dal.EventRepository;
-import com.filsanguinaire.tournament.dal.TournamentRulesRepository;
 import com.filsanguinaire.tournament.dto.event.EventCreateUpdateDTO;
 import com.filsanguinaire.tournament.dto.event.EventDetailDTO;
 import com.filsanguinaire.tournament.dto.event.EventSummaryDTO;
@@ -20,9 +20,10 @@ import lombok.RequiredArgsConstructor;
 public class EventServiceImpl implements IEventService {
 
 	private final EventRepository eventRepository;
-	private final TournamentRulesRepository rulesRepository;
+	private final IRulesService rulesService;
     
 	@Override
+	@Transactional(readOnly = true)
 	public List<EventSummaryDTO> getAll() {
 		return eventRepository.findAll()
                 .stream()
@@ -31,6 +32,7 @@ public class EventServiceImpl implements IEventService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public EventDetailDTO getCurrent() {
 		Event event = eventRepository
                 .findFirstByStatusIn(List.of(EventStatus.PLANNED, EventStatus.IN_PROGRESS))
@@ -39,6 +41,7 @@ public class EventServiceImpl implements IEventService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public EventDetailDTO getById(Long id) {
 		Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(id));
@@ -46,6 +49,7 @@ public class EventServiceImpl implements IEventService {
 	}
 
 	@Override
+	@Transactional
 	public EventDetailDTO create(EventCreateUpdateDTO dto) {
 		Event event = Event.builder()
                 .name(dto.getName())
@@ -59,6 +63,7 @@ public class EventServiceImpl implements IEventService {
 	}
 
 	@Override
+	@Transactional
 	public EventDetailDTO update(Long id, EventCreateUpdateDTO dto) {
 		Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(id));
@@ -80,7 +85,7 @@ public class EventServiceImpl implements IEventService {
     }
 
     private EventDetailDTO toDetailDTO(Event event) {
-        return EventDetailDTO.builder()
+    	return EventDetailDTO.builder()
                 .id(event.getId())
                 .name(event.getName())
                 .eventDate(event.getEventDate())
@@ -88,7 +93,7 @@ public class EventServiceImpl implements IEventService {
                 .status(event.getStatus())
                 .maxParticipants(event.getMaxParticipants())
                 .nbRounds(event.getNbRounds())
-                .rules(null) 
+                .rules(rulesService.findByEvent(event.getId()).orElse(null)) 
                 .build();
     }
 }
