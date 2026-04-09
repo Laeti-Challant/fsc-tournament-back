@@ -16,19 +16,31 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 404 — Utilisateur introuvable
+    // 404 - Utilisateur introuvable
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+    
+ // 404 - Event introuvable
+    @ExceptionHandler(EventNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleEventNotFound(EventNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
 
-    // 409 — Email déjà utilisé
+    // 409 - Ruleset déjà existant pour cet event
+    @ExceptionHandler(RulesAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleRulesAlreadyExists(RulesAlreadyExistsException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    // 409 - Email déjà utilisé
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    // 409 — Pseudo déjà utilisé
+    // 409 - Pseudo déjà utilisé
     @ExceptionHandler(PseudoAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handlePseudoAlreadyExists(PseudoAlreadyExistsException ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
@@ -40,23 +52,24 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, "Email ou mot de passe incorrect");
     }
 
-    // 403 — Compte désactivé
+    // 403 - Compte désactivé
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<Map<String, Object>> handleDisabled(DisabledException ex) {
         return buildResponse(HttpStatus.FORBIDDEN, "Compte désactivé");
     }
-
+    // 403 - Autorisation refusée
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<String> handleAuthorizationDenied(AuthorizationDeniedException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Accès refusé");
     }
     
+    // 403 - Opération illégale
     @ExceptionHandler(IllegalOperationException.class)
     public ResponseEntity<String> handleIllegalOperation(IllegalOperationException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
     
-    // 400 — Erreurs de validation @Valid
+    // 400 - Erreurs de validation @Valid
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, Object> errors = new HashMap<>();
@@ -71,7 +84,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
-    // 500 — Erreur inattendue
+    // 500 - Erreur inattendue
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Une erreur inattendue s'est produite");

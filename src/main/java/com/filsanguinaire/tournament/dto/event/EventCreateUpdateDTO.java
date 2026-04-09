@@ -19,7 +19,7 @@ public class EventCreateUpdateDTO {
     
     private LocalDate registrationDeadline;
     
-    private Integer maxParticipants;
+    private int maxParticipants;
     
-    private Integer nbRounds;
+    private int nbRounds;
 }

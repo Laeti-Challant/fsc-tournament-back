@@ -15,7 +15,7 @@ public class RosterCategoryDTO {
     
     private String raceName;
     
-    private Integer categoryValue;
+    private short categoryValue;
     
-    private Boolean isMinus;
+    private boolean isMinus;
 }

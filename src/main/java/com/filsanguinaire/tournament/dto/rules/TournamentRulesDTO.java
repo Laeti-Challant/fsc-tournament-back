@@ -15,17 +15,17 @@ public class TournamentRulesDTO {
 
     private Long id;
     
-    private Integer budgetPo;
+    private int budgetPo;
     
-    private Integer pspPool;
+    private short pspPool;
     
-    private Integer maxSkillsPerPlayer;
+    private short maxSkillsPerPlayer;
     
-    private Boolean resurrectionMode;
+    private boolean resurrectionMode;
     
-    private Integer mogettePspValue;
+    private short mogettePspValue;
     
-    private Integer mogettePoValue;
+    private int mogettePoValue;
     
     private String notesText;
     

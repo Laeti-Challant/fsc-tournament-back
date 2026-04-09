@@ -26,9 +26,9 @@ public class EventDetailDTO {
     
     private EventStatus status;
     
-    private Integer maxParticipants;
+    private int maxParticipants;
     
-    private Integer nbRounds;
+    private int nbRounds;
     
     private TournamentRulesDTO rules;
 }
