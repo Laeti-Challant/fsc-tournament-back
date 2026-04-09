@@ -22,5 +22,5 @@ public interface IUserService extends UserDetailsService {
 
     // ── Administration ───────────────────────────────────────
     Page<UserDTO> getAllUsers(Pageable pageable);
-    UserDTO updateUserByAdmin(Long id, UserAdminUpdateDTO dto);
+    UserDTO updateUserByAdmin(Long id, UserAdminUpdateDTO dto, String currentUserEmail);
 }

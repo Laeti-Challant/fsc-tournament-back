@@ -70,7 +70,8 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDTO> updateUserByAdmin(
             @PathVariable Long id,
-            @Valid @RequestBody UserAdminUpdateDTO dto) {
-        return ResponseEntity.ok(userService.updateUserByAdmin(id, dto));
+            @Valid @RequestBody UserAdminUpdateDTO dto,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        return ResponseEntity.ok(userService.updateUserByAdmin(id, dto, currentUser.getUsername()));
     }
 }
