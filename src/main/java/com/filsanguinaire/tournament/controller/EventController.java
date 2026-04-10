@@ -39,7 +39,7 @@ public class EventController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EventDetailDTO> getById(@PathVariable Long id) {
+    public ResponseEntity<EventDetailDTO> getById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(eventService.getById(id));
     }
 
@@ -52,7 +52,7 @@ public class EventController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EventDetailDTO> update(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody EventCreateUpdateDTO dto) {
         return ResponseEntity.ok(eventService.update(id, dto));
     }

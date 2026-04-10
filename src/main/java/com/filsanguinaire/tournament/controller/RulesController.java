@@ -26,14 +26,14 @@ public class RulesController {
 	private final IRulesService rulesService;
 
     @GetMapping
-    public ResponseEntity<TournamentRulesDTO> getByEvent(@PathVariable Long eventId) {
+    public ResponseEntity<TournamentRulesDTO> getByEvent(@PathVariable("eventId") Long eventId) {
         return ResponseEntity.ok(rulesService.getByEvent(eventId));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TournamentRulesDTO> create(
-            @PathVariable Long eventId,
+            @PathVariable("eventId") Long eventId,
             @Valid @RequestBody TournamentRulesCreateUpdateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(rulesService.create(eventId, dto));
     }
@@ -41,7 +41,7 @@ public class RulesController {
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TournamentRulesDTO> update(
-            @PathVariable Long eventId,
+            @PathVariable("eventId") Long eventId,
             @Valid @RequestBody TournamentRulesCreateUpdateDTO dto) {
         return ResponseEntity.ok(rulesService.update(eventId, dto));
     }
@@ -49,8 +49,8 @@ public class RulesController {
     @PostMapping("/clone-from/{sourceEventId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TournamentRulesDTO> cloneFromEvent(
-            @PathVariable Long eventId,
-            @PathVariable Long sourceEventId) {
+            @PathVariable("eventId") Long eventId,
+            @PathVariable("sourceEventId") Long sourceEventId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(rulesService.cloneFromEvent(eventId, sourceEventId));
     }
 }
