@@ -54,7 +54,7 @@ public class RulesServiceImpl implements IRulesService {
 
 		TournamentRules rules = TournamentRules.builder().event(event).budgetPo(dto.getBudgetPo())
 				.pspPool(dto.getPspPool()).maxSkillsPerPlayer(dto.getMaxSkillsPerPlayer())
-				.resurrectionMode(dto.isResurrectionMode()).mogettePspValue(dto.getMogettePspValue())
+				.resurrectionMode(dto.getResurrectionMode()).mogettePspValue(dto.getMogettePspValue())
 				.mogettePoValue(dto.getMogettePoValue()).notesText(dto.getNotesText()).rosterText(dto.getRosterText())
 				.build();
 
@@ -73,7 +73,7 @@ public class RulesServiceImpl implements IRulesService {
         rules.setBudgetPo(dto.getBudgetPo());
         rules.setPspPool(dto.getPspPool());
         rules.setMaxSkillsPerPlayer(dto.getMaxSkillsPerPlayer());
-        rules.setResurrectionMode(dto.isResurrectionMode());
+        rules.setResurrectionMode(dto.getResurrectionMode());
         rules.setMogettePspValue(dto.getMogettePspValue());
         rules.setMogettePoValue(dto.getMogettePoValue());
         rules.setNotesText(dto.getNotesText());
@@ -163,10 +163,16 @@ public class RulesServiceImpl implements IRulesService {
 						.raceName(c.getRaceName()).categoryValue(c.getCategoryValue()).isMinus(c.isMinus()).build())
 				.toList();
 
-		return TournamentRulesDTO.builder().id(rules.getId()).budgetPo(rules.getBudgetPo()).pspPool(rules.getPspPool())
-				.maxSkillsPerPlayer(rules.getMaxSkillsPerPlayer()).resurrectionMode(rules.isResurrectionMode())
-				.mogettePspValue(rules.getMogettePspValue()).mogettePoValue(rules.getMogettePoValue())
-				.notesText(rules.getNotesText()).rosterText(rules.getRosterText()).allowedInducements(inducements)
+		return TournamentRulesDTO.builder()
+				.id(rules.getId())
+				.budgetPo(rules.getBudgetPo())
+				.pspPool(rules.getPspPool())
+				.maxSkillsPerPlayer(rules.getMaxSkillsPerPlayer())
+				.resurrectionMode(rules.isResurrectionMode())
+				.mogettePspValue(rules.getMogettePspValue())
+				.mogettePoValue(rules.getMogettePoValue())
+				.notesText(rules.getNotesText())
+				.rosterText(rules.getRosterText()).allowedInducements(inducements)
 				.rosterCategories(categories).build();
 	}
 }

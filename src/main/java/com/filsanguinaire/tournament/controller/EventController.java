@@ -18,6 +18,7 @@ import com.filsanguinaire.tournament.dto.event.EventCreateUpdateDTO;
 import com.filsanguinaire.tournament.dto.event.EventDetailDTO;
 import com.filsanguinaire.tournament.dto.event.EventSummaryDTO;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -44,7 +45,7 @@ public class EventController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<EventDetailDTO> create(@RequestBody EventCreateUpdateDTO dto) {
+    public ResponseEntity<EventDetailDTO> create(@Valid @RequestBody EventCreateUpdateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.create(dto));
     }
 
@@ -52,7 +53,7 @@ public class EventController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EventDetailDTO> update(
             @PathVariable Long id,
-            @RequestBody EventCreateUpdateDTO dto) {
+            @Valid @RequestBody EventCreateUpdateDTO dto) {
         return ResponseEntity.ok(eventService.update(id, dto));
     }
 }
