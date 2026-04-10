@@ -15,6 +15,7 @@ import com.filsanguinaire.tournament.bll.IRulesService;
 import com.filsanguinaire.tournament.dto.rules.TournamentRulesCreateUpdateDTO;
 import com.filsanguinaire.tournament.dto.rules.TournamentRulesDTO;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -33,7 +34,7 @@ public class RulesController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TournamentRulesDTO> create(
             @PathVariable Long eventId,
-            @RequestBody TournamentRulesCreateUpdateDTO dto) {
+            @Valid @RequestBody TournamentRulesCreateUpdateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(rulesService.create(eventId, dto));
     }
 
@@ -41,7 +42,7 @@ public class RulesController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TournamentRulesDTO> update(
             @PathVariable Long eventId,
-            @RequestBody TournamentRulesCreateUpdateDTO dto) {
+            @Valid @RequestBody TournamentRulesCreateUpdateDTO dto) {
         return ResponseEntity.ok(rulesService.update(eventId, dto));
     }
 
