@@ -1,0 +1,19 @@
+# Copier ce fichier en application.properties et remplir les valeurs
+# cp application.properties.example application.properties
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/VOTRE_BDD
+spring.datasource.username=VOTRE_USER
+spring.datasource.password=VOTRE_PASSWORD
+
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.open-in-view=false
+
+jwt.secret=VOTRE_SECRET_MIN_32_CARACTERES
+jwt.expiration=86400000
+
+app.cors.allowed-origins=http://localhost:4200
+app.cookie.secure=false
+
+server.servlet.context-path=/filsanguinairecholetais
