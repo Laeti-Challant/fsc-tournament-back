@@ -2,6 +2,8 @@ package com.filsanguinaire.tournament.bo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -40,6 +42,16 @@ public class Coach {
 	
 	@Column(nullable = false)
 	private boolean vegetarian = false;
+	
+	@Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private CoachStatus status = CoachStatus.PENDING;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private RosterStatus rosterStatus = RosterStatus.NOT_SUBMITTED;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "event_id", nullable = false)
