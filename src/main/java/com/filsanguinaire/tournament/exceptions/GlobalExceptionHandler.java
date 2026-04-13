@@ -27,6 +27,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleEventNotFound(EventNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+    
+    // 404 - Coach introuvable
+    @ExceptionHandler(CoachNotFoundException.class)
+    public ResponseEntity<String> handleCoachNotFound(CoachNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
 
     // 409 - Ruleset déjà existant pour cet event
     @ExceptionHandler(RulesAlreadyExistsException.class)
@@ -44,6 +50,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PseudoAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handlePseudoAlreadyExists(PseudoAlreadyExistsException ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+    
+    // 409 - Coach déjà existant pour cet event
+    @ExceptionHandler(AlreadyCoachRegisteredException.class)
+    public ResponseEntity<String> handleAlreadyRegistered(AlreadyCoachRegisteredException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
     // 401 — Mauvais identifiants
