@@ -49,6 +49,13 @@ public class CoachServiceImpl implements ICoachService {
 	}
 
 	@Override
+	public CoachDetailDTO getMyCoach(Long eventId, Long userId) {
+		return coachRepository.findByUserIdAndEventId(userId, eventId)
+	            .map(this::toDetailDTO)
+	            .orElse(null);
+	}
+	
+	@Override
 	public CoachDetailDTO register(Long eventId, Long userId, CoachCreateDTO dto) {
 		if (coachRepository.existsByUserIdAndEventId(userId, eventId)) {
 			throw new AlreadyCoachRegisteredException();
@@ -118,5 +125,4 @@ public class CoachServiceImpl implements ICoachService {
                 .userEmail(coach.getUser().getEmail())
                 .build();
     }
-
 }

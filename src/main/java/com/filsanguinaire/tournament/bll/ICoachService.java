@@ -16,6 +16,8 @@ public interface ICoachService {
     
     Page<CoachDetailDTO> getMealsByEvent(Long eventId, Pageable pageable);
     
+    CoachDetailDTO getMyCoach(Long eventId, Long userId);
+    
     CoachDetailDTO register(Long eventId, Long userId, CoachCreateDTO dto); 
     
     CoachDetailDTO adminUpdate(Long eventId, Long coachId, CoachUpdateDTO dto);

@@ -39,12 +39,21 @@ public class CoachController {
         return ResponseEntity.ok(coachService.getAllByEvent(eventId, pageable));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CoachDetailDTO> getById(
-            @PathVariable Long eventId,
-            @PathVariable Long id) {
-        return ResponseEntity.ok(coachService.getById(eventId, id));
-    }
+	@GetMapping("/me")
+	public ResponseEntity<CoachDetailDTO> getMyCoach(
+	        @PathVariable Long eventId,
+	        Authentication authentication) {
+	    UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+	    return ResponseEntity.ok(coachService.getMyCoach(eventId, principal.getId()));
+	}
+	
+	@GetMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<CoachDetailDTO> getById(
+	        @PathVariable Long eventId,
+	        @PathVariable Long id) {
+	    return ResponseEntity.ok(coachService.getById(eventId, id));
+	}	
 
     @GetMapping("/meals")
     @PreAuthorize("hasRole('ADMIN')")
