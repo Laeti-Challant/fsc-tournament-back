@@ -18,6 +18,8 @@ public class CoachDetailDTO {
 	
 	private String coachPseudo;
 	
+	private String teamName;
+	
 	private String race;
 	
 	private boolean eating;

@@ -27,6 +27,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleEventNotFound(EventNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+    
+    // 404 - Coach introuvable
+    @ExceptionHandler(CoachNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleCoachNotFound(CoachNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
 
     // 409 - Ruleset déjà existant pour cet event
     @ExceptionHandler(RulesAlreadyExistsException.class)
@@ -45,6 +51,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handlePseudoAlreadyExists(PseudoAlreadyExistsException ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
+    
+    // 409 - Coach déjà existant pour cet event
+    @ExceptionHandler(AlreadyCoachRegisteredException.class)
+    public ResponseEntity<Map<String, Object>> handleAlreadyRegistered(AlreadyCoachRegisteredException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
 
     // 401 — Mauvais identifiants
     @ExceptionHandler(BadCredentialsException.class)
@@ -59,14 +71,14 @@ public class GlobalExceptionHandler {
     }
     // 403 - Autorisation refusée
     @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<String> handleAuthorizationDenied(AuthorizationDeniedException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Accès refusé");
+    public ResponseEntity<Map<String, Object>> handleAuthorizationDenied(AuthorizationDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Accès refusé");
     }
     
     // 403 - Opération illégale
     @ExceptionHandler(IllegalOperationException.class)
-    public ResponseEntity<String> handleIllegalOperation(IllegalOperationException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    public ResponseEntity<Map<String, Object>> handleIllegalOperation(IllegalOperationException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
     
     // 400 - Erreurs de validation @Valid
