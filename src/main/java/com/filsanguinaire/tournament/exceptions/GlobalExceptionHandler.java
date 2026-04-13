@@ -30,8 +30,8 @@ public class GlobalExceptionHandler {
     
     // 404 - Coach introuvable
     @ExceptionHandler(CoachNotFoundException.class)
-    public ResponseEntity<String> handleCoachNotFound(CoachNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleCoachNotFound(CoachNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     // 409 - Ruleset déjà existant pour cet event
@@ -54,8 +54,8 @@ public class GlobalExceptionHandler {
     
     // 409 - Coach déjà existant pour cet event
     @ExceptionHandler(AlreadyCoachRegisteredException.class)
-    public ResponseEntity<String> handleAlreadyRegistered(AlreadyCoachRegisteredException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleAlreadyRegistered(AlreadyCoachRegisteredException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     // 401 — Mauvais identifiants
@@ -71,14 +71,14 @@ public class GlobalExceptionHandler {
     }
     // 403 - Autorisation refusée
     @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<String> handleAuthorizationDenied(AuthorizationDeniedException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Accès refusé");
+    public ResponseEntity<Map<String, Object>> handleAuthorizationDenied(AuthorizationDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Accès refusé");
     }
     
     // 403 - Opération illégale
     @ExceptionHandler(IllegalOperationException.class)
-    public ResponseEntity<String> handleIllegalOperation(IllegalOperationException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    public ResponseEntity<Map<String, Object>> handleIllegalOperation(IllegalOperationException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
     
     // 400 - Erreurs de validation @Valid
