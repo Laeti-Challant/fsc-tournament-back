@@ -3,6 +3,7 @@ package com.filsanguinaire.tournament.bll;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.filsanguinaire.tournament.bo.Coach;
 import com.filsanguinaire.tournament.bo.Event;
@@ -33,10 +34,22 @@ public class CoachServiceImpl implements ICoachService {
     
 	@Override
 	public Page<CoachSummaryDTO> getAllByEvent(Long eventId, Pageable pageable) {
+		if (!eventRepository.existsById(eventId) ) {
+			throw new EventNotFoundException(eventId);
+		}
 		return coachRepository.findByEventId(eventId, pageable).map(this::toSummaryDTO);
 	}
 
 	@Override
+	@Transactional
+	public CoachDetailDTO getMyCoach(Long eventId, Long userId) {
+		return coachRepository.findByUserIdAndEventId(userId, eventId)
+	            .map(this::toDetailDTO)
+	            .orElse(null);
+	}
+	
+	@Override
+	@Transactional
 	public CoachDetailDTO getById(Long eventId, Long coachId) {
 		Coach coach = coachRepository.findById(coachId).filter(c -> c.getEvent().getId().equals(eventId))
 				.orElseThrow(() -> new CoachNotFoundException(coachId));
@@ -44,17 +57,11 @@ public class CoachServiceImpl implements ICoachService {
 	}
 
 	@Override
+	@Transactional
 	public Page<CoachDetailDTO> getMealsByEvent(Long eventId, Pageable pageable) {
 		return coachRepository.findByEventId(eventId, pageable).map(this::toDetailDTO);
 	}
 
-	@Override
-	public CoachDetailDTO getMyCoach(Long eventId, Long userId) {
-		return coachRepository.findByUserIdAndEventId(userId, eventId)
-	            .map(this::toDetailDTO)
-	            .orElse(null);
-	}
-	
 	@Override
 	public CoachDetailDTO register(Long eventId, Long userId, CoachCreateDTO dto) {
 		if (coachRepository.existsByUserIdAndEventId(userId, eventId)) {
@@ -77,6 +84,7 @@ public class CoachServiceImpl implements ICoachService {
 	}
 
 	@Override
+	@Transactional
 	public CoachDetailDTO adminUpdate(Long eventId, Long coachId, CoachUpdateDTO dto) {
 		Coach coach = coachRepository.findById(coachId)
 	            .filter(c -> c.getEvent().getId().equals(eventId))
