@@ -110,7 +110,7 @@ public class UserServiceImpl implements IUserService {
 	@Override
 	public UserDTO updateUserByAdmin(Long id, UserAdminUpdateDTO dto, String currentUserEmail) {
 		User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("id: " + id));
+                .orElseThrow(() -> new UserNotFoundException(id));
 		
 		 // Empêcher l'admin de modifier son propre rôle
 	    if (user.getEmail().equals(currentUserEmail)) {

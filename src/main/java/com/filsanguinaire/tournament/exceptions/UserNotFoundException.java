@@ -10,4 +10,8 @@ public class UserNotFoundException extends RuntimeException {
 	public UserNotFoundException(String email) {
 		super("Utilisateur introuvable : " + email);
 	}
+	
+	public UserNotFoundException(Long id) {
+		super("Utilisateur introuvable avec l'id : " + id);
+	}
 }
