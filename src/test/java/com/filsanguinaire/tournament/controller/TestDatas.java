@@ -15,13 +15,13 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.filsanguinaire.tournament.bll.IRulesService;
 import com.filsanguinaire.tournament.bo.AllowedInducement;
-import com.filsanguinaire.tournament.bo.Event;
 import com.filsanguinaire.tournament.bo.EventStatus;
 import com.filsanguinaire.tournament.bo.Role;
 import com.filsanguinaire.tournament.bo.RosterCategory;
+import com.filsanguinaire.tournament.bo.Tournament;
 import com.filsanguinaire.tournament.bo.TournamentRules;
 import com.filsanguinaire.tournament.bo.User;
-import com.filsanguinaire.tournament.dal.EventRepository;
+import com.filsanguinaire.tournament.dal.TournamentRepository;
 import com.filsanguinaire.tournament.dal.TournamentRulesRepository;
 import com.filsanguinaire.tournament.dal.UserRepository;
 import com.filsanguinaire.tournament.dto.rules.TournamentRulesDTO;
@@ -33,9 +33,9 @@ public class TestDatas {
 
     @Autowired
     private UserRepository userRepository;
-
+    
     @Autowired
-    private EventRepository eventRepository;
+    private TournamentRepository tournamentRepository;
 
     @Autowired
     private TournamentRulesRepository rulesRepository;
@@ -97,18 +97,22 @@ public class TestDatas {
     }
 
     // =========================================================================
-    // TEST 02 — EVENT VIII (passé, FINISHED)
+    // TEST 02 — TOURNAMENT VIII (passé, FINISHED)
     // =========================================================================
 
     @Test
-    void test02_InsertEventVIII() {
-        final Event choletBowlVIII = eventRepository.save(Event.builder()
+    void test02_InsertTournamentVIII() {
+        final Tournament choletBowlVIII = tournamentRepository.save(Tournament.builder()
                 .name("CholetBowl VIII")
                 .eventDate(LocalDate.of(2025, 11, 22))
                 .registrationDeadline(LocalDate.of(2025, 11, 1))
                 .status(EventStatus.FINISHED)
                 .maxParticipants(24)
                 .nbRounds(3)
+                .location("salle des Mauges")
+                .address("allée Jean Monnet")
+                .postalCode("49600")
+                .city("Beaupréeau en Mauges")
                 .build());
 
         assertThat(choletBowlVIII).isNotNull();
@@ -121,13 +125,13 @@ public class TestDatas {
 
     @Test
     void test03_InsertRulesVIII() {
-        final Event eventVIII = eventRepository.findAll().stream()
+        final Tournament tournamentVIII = tournamentRepository.findAll().stream()
                 .filter(e -> e.getName().equals("CholetBowl VIII"))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Event CholetBowl VIII introuvable"));
 
         final TournamentRules rules = TournamentRules.builder()
-                .event(eventVIII)
+                .tournament(tournamentVIII)
                 .budgetPo(1_050_000)
                 .pspPool((short) 30)
                 .maxSkillsPerPlayer((short) 2)
@@ -230,12 +234,12 @@ public class TestDatas {
     }
 
     // =========================================================================
-    // TEST 04 — EVENT IX (à venir, PLANNED)
+    // TEST 04 — TOURNAMENT IX (à venir, PLANNED)
     // =========================================================================
 
     @Test
-    void test04_InsertEventIX() {
-        final Event choletBowlIX = eventRepository.save(Event.builder()
+    void test04_InsertTournamentIX() {
+        final Tournament choletBowlIX = tournamentRepository.save(Tournament.builder()
                 .name("CholetBowl IX")
                 .eventDate(LocalDate.of(2026, 11, 14))
                 .registrationDeadline(LocalDate.of(2026, 10, 31))
@@ -257,17 +261,17 @@ public class TestDatas {
 
     @Test
     void test05_CloneRulesForIX() {
-        final Event eventVIII = eventRepository.findAll().stream()
+        final Tournament tournamentVIII = tournamentRepository.findAll().stream()
                 .filter(e -> e.getName().equals("CholetBowl VIII"))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Event CholetBowl VIII introuvable"));
 
-        final Event eventIX = eventRepository.findAll().stream()
+        final Tournament tournamentIX = tournamentRepository.findAll().stream()
                 .filter(e -> e.getName().equals("CholetBowl IX"))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Event CholetBowl IX introuvable"));
 
-        final TournamentRulesDTO cloned = rulesService.cloneFromEvent(eventIX.getId(), eventVIII.getId());
+        final TournamentRulesDTO cloned = rulesService.cloneFromTournament(tournamentIX.getId(), tournamentVIII.getId());
 
         assertThat(cloned).isNotNull();
         assertThat(cloned.getAllowedInducements()).hasSize(14);
