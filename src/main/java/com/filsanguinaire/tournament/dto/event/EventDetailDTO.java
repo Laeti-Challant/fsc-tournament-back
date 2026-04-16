@@ -30,5 +30,15 @@ public class EventDetailDTO {
     
     private int nbRounds;
     
+    private String type;
+    
+    private String location;
+    
+    private String address;
+    
+    private String postalCode;
+    
+    private String city;
+    
     private TournamentRulesDTO rules;
 }
