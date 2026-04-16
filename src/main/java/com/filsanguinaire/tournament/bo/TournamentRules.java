@@ -27,6 +27,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 public class TournamentRules {
+	
 	@Id
 	@GeneratedValue(strategy =GenerationType.IDENTITY )
 	private Long id;
@@ -41,6 +42,7 @@ public class TournamentRules {
 	private short maxSkillsPerPlayer;
 	
 	@Column(nullable = false)
+	@Builder.Default
 	private boolean resurrectionMode = true;
 	
 	@Column(nullable = false)
@@ -56,14 +58,6 @@ public class TournamentRules {
 	private String rosterText;
 	
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "event_id", unique = true)
-	private Event event;
-	
-	@Builder.Default
-	@OneToMany(mappedBy = "rules", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<AllowedInducement> allowedInducements = new ArrayList<>();
-	
-	@Builder.Default
-	@OneToMany(mappedBy = "rules", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<RosterCategory> rosterCategories = new ArrayList<>();
+    @JoinColumn(name = "tournament_id", nullable = false, unique = true)
+    private Tournament tournament;
 }

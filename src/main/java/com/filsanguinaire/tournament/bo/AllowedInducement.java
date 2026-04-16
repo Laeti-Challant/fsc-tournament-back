@@ -22,6 +22,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 public class AllowedInducement {
+	
 	@Id
 	@GeneratedValue(strategy =GenerationType.IDENTITY )
 	private Long id;
