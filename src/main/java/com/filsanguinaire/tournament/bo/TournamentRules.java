@@ -60,4 +60,12 @@ public class TournamentRules {
 	@OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tournament_id", nullable = false, unique = true)
     private Tournament tournament;
+	
+	@OneToMany(mappedBy = "rules", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<AllowedInducement> allowedInducements = new ArrayList<>();
+
+    @OneToMany(mappedBy = "rules", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<RosterCategory> rosterCategories = new ArrayList<>();
 }

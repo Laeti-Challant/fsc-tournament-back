@@ -8,7 +8,7 @@ import com.filsanguinaire.tournament.bo.TournamentRules;
 
 public interface TournamentRulesRepository extends JpaRepository<TournamentRules, Long> {
 
-	Optional<TournamentRules> findByEventId(Long eventId);
+	Optional<TournamentRules> findByTournamentId(Long tournamentId);
 	
-	boolean existsByEventId(Long eventId);
+	boolean existsByTournamentId(Long tournamentId);
 }
