@@ -48,10 +48,16 @@ public class SecurityConfig {
 					    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 					    // Auth publique
 					    .requestMatchers("/auth/**").permitAll()
-					    // /coaches/me nécessite authentification 
-					    .requestMatchers(HttpMethod.GET, "/events/*/coaches/me").authenticated()
+					    // /coaches/me nécessite authentification
+					    .requestMatchers(HttpMethod.GET, "/tournaments/*/coaches/me").authenticated()
+					    // Inscription nécessite authentification
+					    .requestMatchers(HttpMethod.POST, "/tournaments/*/coaches").authenticated()
+					    // Modification inscription nécessite authentification
+					    .requestMatchers(HttpMethod.PUT, "/tournaments/*/coaches/me").authenticated()
 					    // Lecture publique des events
-					    .requestMatchers(HttpMethod.GET, "/events/**").permitAll()					    
+					    .requestMatchers(HttpMethod.GET, "/events/**").permitAll()
+					    // Lecture publique des tournaments (current, coaches list)
+					    .requestMatchers(HttpMethod.GET, "/tournaments/**").permitAll()
 					    // Lecture publique des classements
 					    .requestMatchers(HttpMethod.GET, "/standings/**").permitAll()
 					    // Tout le reste nécessite authentification

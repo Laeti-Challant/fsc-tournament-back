@@ -1,5 +1,7 @@
 package com.filsanguinaire.tournament.bll;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,19 +13,19 @@ import com.filsanguinaire.tournament.dto.coach.CoachUpdateDTO;
 
 public interface ICoachService {
 
-	Page<CoachSummaryDTO> getAllByEvent(Long eventId, Pageable pageable);
+	Page<CoachSummaryDTO> getAllByTournament(Long tournamentId, Pageable pageable);
 	
-    CoachDetailDTO getById(Long eventId, Long coachId);
+    CoachDetailDTO getById(Long tournamenttId, Long coachId);
     
-    Page<CoachDetailDTO> getMealsByEvent(Long eventId, Pageable pageable);
+    Page<CoachDetailDTO> getMealsByTournament(Long tournamentId, Pageable pageable);
     
-    CoachDetailDTO getMyCoach(Long eventId, Long userId);
+    Optional<CoachDetailDTO> getMyCoach(Long tournamentId, Long userId);
     
-    CoachDetailDTO register(Long eventId, Long userId, CoachCreateDTO dto); 
+    CoachDetailDTO register(Long tournamentId, Long userId, CoachCreateDTO dto); 
     
-    CoachDetailDTO adminUpdate(Long eventId, Long coachId, CoachAdminUpdateDTO dto);
+    CoachDetailDTO adminUpdate(Long tournamentId, Long coachId, CoachAdminUpdateDTO dto);
     
-    void delete(Long eventId, Long coachId);
+    void delete(Long tournamentId, Long coachId);
 
-	CoachDetailDTO updateMe(long eventId, long userId, CoachUpdateDTO dto);
+	CoachDetailDTO updateMe(long tournamentId, long userId, CoachUpdateDTO dto);
 }

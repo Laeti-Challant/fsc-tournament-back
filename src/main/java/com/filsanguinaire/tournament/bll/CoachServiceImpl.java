@@ -2,6 +2,7 @@ package com.filsanguinaire.tournament.bll;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.filsanguinaire.tournament.bo.Coach;
 import com.filsanguinaire.tournament.bo.CoachStatus;
-import com.filsanguinaire.tournament.bo.Event;
 import com.filsanguinaire.tournament.bo.EventStatus;
 import com.filsanguinaire.tournament.bo.Tournament;
 import com.filsanguinaire.tournament.bo.TournamentRules;
@@ -25,7 +25,6 @@ import com.filsanguinaire.tournament.dto.coach.CoachCreateDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachDetailDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachSummaryDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachUpdateDTO;
-import com.filsanguinaire.tournament.dto.rules.TournamentRulesCreateUpdateDTO;
 import com.filsanguinaire.tournament.exceptions.AlreadyCoachRegisteredException;
 import com.filsanguinaire.tournament.exceptions.CoachNotFoundException;
 import com.filsanguinaire.tournament.exceptions.EventNotFoundException;
@@ -51,43 +50,42 @@ public class CoachServiceImpl implements ICoachService {
     private final TournamentRulesRepository tournamentRulesRepository;
     
 	@Override
-	public Page<CoachSummaryDTO> getAllByEvent(Long eventId, Pageable pageable) {
-		if (!eventRepository.existsById(eventId) ) {
-			throw new EventNotFoundException(eventId);
+	public Page<CoachSummaryDTO> getAllByTournament(Long tournamentId, Pageable pageable) {
+		if (!eventRepository.existsById(tournamentId) ) {
+			throw new EventNotFoundException(tournamentId);
 		}
-		return coachRepository.findByEventId(eventId, pageable).map(this::toSummaryDTO);
+		return coachRepository.findByEventId(tournamentId, pageable).map(this::toSummaryDTO);
 	}
 
 	@Override
-	@Transactional
-	public CoachDetailDTO getMyCoach(Long eventId, Long userId) {
-		return coachRepository.findByUserIdAndEventId(userId, eventId)
-	            .map(this::toDetailDTO)
-	            .orElse(null);
+	@Transactional(readOnly = true)
+	public Optional<CoachDetailDTO> getMyCoach(Long tournamentId, Long userId) {
+		return coachRepository.findByUserIdAndEventId(userId, tournamentId)
+	            .map(this::toDetailDTO);
 	}
 	
 	@Override
 	@Transactional
-	public CoachDetailDTO getById(Long eventId, Long coachId) {
-		Coach coach = coachRepository.findById(coachId).filter(c -> c.getEvent().getId().equals(eventId))
+	public CoachDetailDTO getById(Long tournamentId, Long coachId) {
+		Coach coach = coachRepository.findById(coachId).filter(c -> c.getEvent().getId().equals(tournamentId))
 				.orElseThrow(() -> new CoachNotFoundException(coachId));
 		return toDetailDTO(coach);
 	}
 
 	@Override
 	@Transactional
-	public Page<CoachDetailDTO> getMealsByEvent(Long eventId, Pageable pageable) {
-		return coachRepository.findByEventId(eventId, pageable).map(this::toDetailDTO);
+	public Page<CoachDetailDTO> getMealsByTournament(Long tournamentId, Pageable pageable) {
+		return coachRepository.findByEventId(tournamentId, pageable).map(this::toDetailDTO);
 	}
 
 	@Override
 	@Transactional
-	public CoachDetailDTO register(Long eventId, Long userId, CoachCreateDTO dto) {
-		if (coachRepository.existsByUserIdAndEventId(userId, eventId)) {
+	public CoachDetailDTO register(Long tournamentId, Long userId, CoachCreateDTO dto) {
+		if (coachRepository.existsByUserIdAndEventId(userId, tournamentId)) {
 			throw new AlreadyCoachRegisteredException();
 		}
 		
-		Tournament tournament = tournamentRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+		Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow(() -> new EventNotFoundException(tournamentId));
 		
 		if (tournament.getStatus() != EventStatus.PLANNED) {
 			throw new RegistrationClosedException();
@@ -97,12 +95,12 @@ public class CoachServiceImpl implements ICoachService {
 			throw new RegistrationClosedException();
 		}
 		
-		long currentCount = coachRepository.countByEventIdAndStatusIn(eventId, List.of(CoachStatus.PENDING, CoachStatus.VALIDATED));
+		long currentCount = coachRepository.countByEventIdAndStatusIn(tournamentId, List.of(CoachStatus.PENDING, CoachStatus.VALIDATED));
 		if (currentCount >= tournament.getMaxParticipants()) {
 			throw new TournamentFullException(tournament.getMaxParticipants());
 		}
 		
-		TournamentRules rules =tournamentRulesRepository.findByTournamentId(eventId).orElseThrow(() -> new IllegalStateException("Aucun ruleset configuré pour le tournoi  " + eventId));
+		TournamentRules rules =tournamentRulesRepository.findByTournamentId(tournamentId).orElseThrow(() -> new IllegalStateException("Aucun ruleset configuré pour le tournoi  " + tournamentId));
 
 		boolean raceExists = rules.getRosterCategories().stream().anyMatch(rc -> rc.getRaceName().equalsIgnoreCase(dto.getRace()));
 		if (!raceExists) {
@@ -126,9 +124,9 @@ public class CoachServiceImpl implements ICoachService {
 
 	@Override
 	@Transactional
-	public CoachDetailDTO adminUpdate(Long eventId, Long coachId, CoachAdminUpdateDTO dto) {
+	public CoachDetailDTO adminUpdate(Long tournamentId, Long coachId, CoachAdminUpdateDTO dto) {
 		Coach coach = coachRepository.findById(coachId)
-	            .filter(c -> c.getEvent().getId().equals(eventId))
+	            .filter(c -> c.getEvent().getId().equals(tournamentId))
 	            .orElseThrow(() -> new CoachNotFoundException(coachId));
 
 		coach.setStatus(dto.getStatus());
@@ -139,9 +137,9 @@ public class CoachServiceImpl implements ICoachService {
 	}
 
 	@Override
-	public void delete(Long eventId, Long coachId) {
+	public void delete(Long tournamentId, Long coachId) {
 		Coach coach = coachRepository.findById(coachId)
-	            .filter(c -> c.getEvent().getId().equals(eventId))
+	            .filter(c -> c.getEvent().getId().equals(tournamentId))
 	            .orElseThrow(() -> new CoachNotFoundException(coachId));
 
 	    coachRepository.delete(coach);
