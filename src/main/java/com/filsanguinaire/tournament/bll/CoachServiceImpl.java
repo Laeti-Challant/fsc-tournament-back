@@ -115,6 +115,8 @@ public class CoachServiceImpl implements ICoachService {
                 .coachPseudo(coach.getCoachPseudo())
                 .teamName(coach.getTeamName())
                 .race(coach.getRace())
+                .status(coach.getStatus())
+                .rosterStatus(coach.getRosterStatus())
                 .build();
     }
 
@@ -128,6 +130,8 @@ public class CoachServiceImpl implements ICoachService {
                 .vegetarian(coach.isVegetarian())
                 .status(coach.getStatus())
                 .rosterStatus(coach.getRosterStatus())
+                .rosterLink(coach.getRosterLink())
+                .substitute(coach.isSubstitute())
                 .userId(coach.getUser().getId())
                 .userPseudo(coach.getUser().getPseudo())
                 .userEmail(coach.getUser().getEmail())

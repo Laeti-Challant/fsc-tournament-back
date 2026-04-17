@@ -1,5 +1,8 @@
 package com.filsanguinaire.tournament.dto.coach;
 
+import com.filsanguinaire.tournament.bo.CoachStatus;
+import com.filsanguinaire.tournament.bo.RosterStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,4 +21,8 @@ public class CoachSummaryDTO {
     private String teamName;
     
     private String race;
+    
+    private CoachStatus status;
+    
+    private RosterStatus rosterStatus;
 }
