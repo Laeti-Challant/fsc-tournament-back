@@ -1,23 +1,36 @@
 package com.filsanguinaire.tournament.bll;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.filsanguinaire.tournament.bo.Coach;
+import com.filsanguinaire.tournament.bo.CoachStatus;
 import com.filsanguinaire.tournament.bo.Event;
+import com.filsanguinaire.tournament.bo.EventStatus;
+import com.filsanguinaire.tournament.bo.Tournament;
+import com.filsanguinaire.tournament.bo.TournamentRules;
 import com.filsanguinaire.tournament.bo.User;
 import com.filsanguinaire.tournament.dal.CoachRepository;
 import com.filsanguinaire.tournament.dal.EventRepository;
+import com.filsanguinaire.tournament.dal.TournamentRepository;
+import com.filsanguinaire.tournament.dal.TournamentRulesRepository;
 import com.filsanguinaire.tournament.dal.UserRepository;
 import com.filsanguinaire.tournament.dto.coach.CoachCreateDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachDetailDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachSummaryDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachUpdateDTO;
+import com.filsanguinaire.tournament.dto.rules.TournamentRulesCreateUpdateDTO;
 import com.filsanguinaire.tournament.exceptions.AlreadyCoachRegisteredException;
 import com.filsanguinaire.tournament.exceptions.CoachNotFoundException;
 import com.filsanguinaire.tournament.exceptions.EventNotFoundException;
+import com.filsanguinaire.tournament.exceptions.InvalidRaceException;
+import com.filsanguinaire.tournament.exceptions.RegistrationClosedException;
+import com.filsanguinaire.tournament.exceptions.TournamentFullException;
 import com.filsanguinaire.tournament.exceptions.UserNotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +44,10 @@ public class CoachServiceImpl implements ICoachService {
     private final EventRepository eventRepository;
     
     private final UserRepository userRepository;
+    
+    private final TournamentRepository tournamentRepository;
+    
+    private final TournamentRulesRepository tournamentRulesRepository;
     
 	@Override
 	public Page<CoachSummaryDTO> getAllByEvent(Long eventId, Pageable pageable) {
@@ -63,13 +80,35 @@ public class CoachServiceImpl implements ICoachService {
 	}
 
 	@Override
+	@Transactional
 	public CoachDetailDTO register(Long eventId, Long userId, CoachCreateDTO dto) {
 		if (coachRepository.existsByUserIdAndEventId(userId, eventId)) {
 			throw new AlreadyCoachRegisteredException();
 		}
 		
-		Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
-		User user = userRepository.findById(userId).orElseThrow(()-> new UserNotFoundException(userId));
+		Tournament tournament = tournamentRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+		
+		if (tournament.getStatus() != EventStatus.PLANNED) {
+			throw new RegistrationClosedException();
+		}
+		
+		if (LocalDate.now().isAfter(tournament.getRegistrationDeadline())) {
+			throw new RegistrationClosedException();
+		}
+		
+		long currentCount = coachRepository.countByEventIdAndStatusIn(eventId, List.of(CoachStatus.PENDING, CoachStatus.VALIDATED));
+		if (currentCount >= tournament.getMaxParticipants()) {
+			throw new TournamentFullException(tournament.getMaxParticipants());
+		}
+		
+		TournamentRules rules =tournamentRulesRepository.findByTournamentId(eventId).orElseThrow(() -> new IllegalStateException("Aucun ruleset configuré pour le tournoi  " + eventId));
+
+		boolean raceExists = rules.getRosterCategories().stream().anyMatch(rc -> rc.getRaceName().equalsIgnoreCase(dto.getRace()));
+		if (!raceExists) {
+			throw new InvalidRaceException(dto.getRace());
+		}
+		
+		User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 		
 		Coach coach = Coach.builder()
 				.coachPseudo(dto.getCoachPseudo())
@@ -77,9 +116,10 @@ public class CoachServiceImpl implements ICoachService {
 				.race(dto.getRace())
 				.eating(dto.isEating())
 				.vegetarian(dto.isVegetarian())
-				.event(event)
+				.event(tournament)
 				.user(user)
 				.build();
+		
 		return toDetailDTO(coachRepository.save(coach));
 	}
 
