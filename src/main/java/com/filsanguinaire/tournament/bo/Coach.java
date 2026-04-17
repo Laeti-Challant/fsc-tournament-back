@@ -10,6 +10,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +25,9 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(of = "id")
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(
+		columnNames = {"user_id", "event_id"},
+		name = "uk_coach_user_event"))
 public class Coach {
 	@Id
 	@GeneratedValue(strategy =GenerationType.IDENTITY )
