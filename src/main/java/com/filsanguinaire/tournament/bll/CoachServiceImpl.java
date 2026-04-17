@@ -20,6 +20,7 @@ import com.filsanguinaire.tournament.dal.EventRepository;
 import com.filsanguinaire.tournament.dal.TournamentRepository;
 import com.filsanguinaire.tournament.dal.TournamentRulesRepository;
 import com.filsanguinaire.tournament.dal.UserRepository;
+import com.filsanguinaire.tournament.dto.coach.CoachAdminUpdateDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachCreateDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachDetailDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachSummaryDTO;
@@ -125,16 +126,14 @@ public class CoachServiceImpl implements ICoachService {
 
 	@Override
 	@Transactional
-	public CoachDetailDTO adminUpdate(Long eventId, Long coachId, CoachUpdateDTO dto) {
+	public CoachDetailDTO adminUpdate(Long eventId, Long coachId, CoachAdminUpdateDTO dto) {
 		Coach coach = coachRepository.findById(coachId)
 	            .filter(c -> c.getEvent().getId().equals(eventId))
 	            .orElseThrow(() -> new CoachNotFoundException(coachId));
 
-	    coach.setCoachPseudo(dto.getCoachPseudo());
-	    coach.setTeamName(dto.getTeamName());
-	    coach.setRace(dto.getRace());
-	    coach.setEating(dto.isEating());
-	    coach.setVegetarian(dto.isVegetarian());
+		coach.setStatus(dto.getStatus());
+	    coach.setRosterStatus(dto.getRosterStatus());
+	    coach.setSubstitute(dto.isSubstitute());
 
 	    return toDetailDTO(coachRepository.save(coach));
 	}
@@ -147,6 +146,36 @@ public class CoachServiceImpl implements ICoachService {
 
 	    coachRepository.delete(coach);
 
+	}
+	
+	@Override
+	@Transactional
+	public CoachDetailDTO updateMe(long eventId, long userId, CoachUpdateDTO dto) {
+		Coach coach = coachRepository.findByUserIdAndEventId(userId, eventId).orElseThrow(() -> new CoachNotFoundException(userId));
+		
+		Tournament tournament = tournamentRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+		
+		if (tournament.getStatus() != EventStatus.PLANNED) {
+			throw new RegistrationClosedException();
+		}
+		
+		if (!coach.getRace().equalsIgnoreCase(dto.getRace())) {
+			TournamentRules rules = tournamentRulesRepository.findByTournamentId(eventId).orElseThrow(() ->  new IllegalStateException("Aucun Ruleset configuré pour le tournoi" + eventId));
+			
+			boolean raceExists = rules.getRosterCategories().stream().anyMatch(rc -> rc.getRaceName().equalsIgnoreCase(dto.getRace()));
+			if (!raceExists) {
+				throw new InvalidRaceException(dto.getRace());
+			}
+		}
+		
+		coach.setCoachPseudo(dto.getCoachPseudo());
+	    coach.setTeamName(dto.getTeamName());
+	    coach.setRace(dto.getRace());
+	    coach.setEating(dto.isEating());
+	    coach.setVegetarian(dto.isVegetarian());
+	    coach.setRosterLink(dto.getRosterLink());
+
+	    return toDetailDTO(coachRepository.save(coach));
 	}
 	
 	private CoachSummaryDTO toSummaryDTO(Coach coach) {
