@@ -7,13 +7,13 @@ import com.filsanguinaire.tournament.dto.rules.TournamentRulesDTO;
 
 public interface IRulesService {
 	
-	Optional<TournamentRulesDTO> findByEvent(Long eventId);
+	Optional<TournamentRulesDTO> findByTournament(Long tournamentId);
 
-	TournamentRulesDTO getByEvent(Long eventId);
+	TournamentRulesDTO getByTournament(Long tournamentId);
 
-    TournamentRulesDTO create(Long eventId, TournamentRulesCreateUpdateDTO dto);
+    TournamentRulesDTO create(Long tournamentId, TournamentRulesCreateUpdateDTO dto);
 
-    TournamentRulesDTO update(Long eventId, TournamentRulesCreateUpdateDTO dto);
+    TournamentRulesDTO update(Long tournamentId, TournamentRulesCreateUpdateDTO dto);
 
-    TournamentRulesDTO cloneFromEvent(Long targetEventId, Long sourceEventId);
+    TournamentRulesDTO cloneFromTournament(Long targetTournamentId, Long sourceTournamentId);
 }

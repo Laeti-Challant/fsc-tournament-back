@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.filsanguinaire.tournament.bo.AllowedInducement;
-import com.filsanguinaire.tournament.bo.Event;
 import com.filsanguinaire.tournament.bo.RosterCategory;
+import com.filsanguinaire.tournament.bo.Tournament;
 import com.filsanguinaire.tournament.bo.TournamentRules;
-import com.filsanguinaire.tournament.dal.EventRepository;
+import com.filsanguinaire.tournament.dal.TournamentRepository;
 import com.filsanguinaire.tournament.dal.TournamentRulesRepository;
 import com.filsanguinaire.tournament.dto.rules.AllowedInducementDTO;
 import com.filsanguinaire.tournament.dto.rules.RosterCategoryDTO;
@@ -26,37 +26,43 @@ import lombok.RequiredArgsConstructor;
 public class RulesServiceImpl implements IRulesService {
 
 	private final TournamentRulesRepository rulesRepository;
-	private final EventRepository eventRepository;
+	private final TournamentRepository tournamentRepository;
 	
 	@Override
 	@Transactional(readOnly = true)
-	public Optional<TournamentRulesDTO> findByEvent(Long eventId) {
-	    return rulesRepository.findByEventId(eventId)
+	public Optional<TournamentRulesDTO> findByTournament(Long tournamentId) {
+	    return rulesRepository.findByTournamentId(tournamentId)
 	            .map(this::toDTO);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public TournamentRulesDTO getByEvent(Long eventId) {
-		TournamentRules rules = rulesRepository.findByEventId(eventId)
-				.orElseThrow(() -> new EventNotFoundException(eventId));
+	public TournamentRulesDTO getByTournament(Long tournamentId) {
+		TournamentRules rules = rulesRepository.findByTournamentId(tournamentId)
+				.orElseThrow(() -> new EventNotFoundException(tournamentId));
 		return toDTO(rules);
 	}
 
 	@Override
 	@Transactional
-	public TournamentRulesDTO create(Long eventId, TournamentRulesCreateUpdateDTO dto) {
-		Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+	public TournamentRulesDTO create(Long tournamentId, TournamentRulesCreateUpdateDTO dto) {
+		Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow(() -> new EventNotFoundException(tournamentId));
 
-		if (rulesRepository.existsByEventId(eventId)) {
-			throw new RulesAlreadyExistsException(eventId);
+		if (rulesRepository.existsByTournamentId(tournamentId)) {
+			throw new RulesAlreadyExistsException(tournamentId);
 		}
 
-		TournamentRules rules = TournamentRules.builder().event(event).budgetPo(dto.getBudgetPo())
-				.pspPool(dto.getPspPool()).maxSkillsPerPlayer(dto.getMaxSkillsPerPlayer())
-				.resurrectionMode(dto.getResurrectionMode()).mogettePspValue(dto.getMogettePspValue())
-				.mogettePoValue(dto.getMogettePoValue()).notesText(dto.getNotesText()).rosterText(dto.getRosterText())
-				.build();
+		TournamentRules rules = TournamentRules.builder()
+                .tournament(tournament)  // au lieu de .event(event)
+                .budgetPo(dto.getBudgetPo())
+                .pspPool(dto.getPspPool())
+                .maxSkillsPerPlayer(dto.getMaxSkillsPerPlayer())
+                .resurrectionMode(dto.getResurrectionMode())
+                .mogettePspValue(dto.getMogettePspValue())
+                .mogettePoValue(dto.getMogettePoValue())
+                .notesText(dto.getNotesText())
+                .rosterText(dto.getRosterText())
+                .build();
 
 		addInducements(dto.getAllowedInducements(), rules);
 		addRosterCategories(dto.getRosterCategories(), rules);
@@ -66,9 +72,9 @@ public class RulesServiceImpl implements IRulesService {
 
 	@Override
 	@Transactional
-	public TournamentRulesDTO update(Long eventId, TournamentRulesCreateUpdateDTO dto) {
-		TournamentRules rules = rulesRepository.findByEventId(eventId)
-                .orElseThrow(() -> new EventNotFoundException(eventId));
+	public TournamentRulesDTO update(Long tournamentId, TournamentRulesCreateUpdateDTO dto) {
+		TournamentRules rules = rulesRepository.findByTournamentId(tournamentId)
+                .orElseThrow(() -> new EventNotFoundException(tournamentId));
 
         rules.setBudgetPo(dto.getBudgetPo());
         rules.setPspPool(dto.getPspPool());
@@ -91,19 +97,19 @@ public class RulesServiceImpl implements IRulesService {
 
 	@Override
 	@Transactional
-	public TournamentRulesDTO cloneFromEvent(Long targetEventId, Long sourceEventId) {
-		Event targetEvent = eventRepository.findById(targetEventId)
-                .orElseThrow(() -> new EventNotFoundException(targetEventId));
+	public TournamentRulesDTO cloneFromTournament(Long targetTournamentId, Long sourceTournamentId) {
+		Tournament targetTournament = tournamentRepository.findById(targetTournamentId)
+                .orElseThrow(() -> new EventNotFoundException(targetTournamentId));
 
-        if (rulesRepository.existsByEventId(targetEventId)) {
-            throw new RulesAlreadyExistsException(targetEventId);
+        if (rulesRepository.existsByTournamentId(targetTournamentId)) {
+            throw new RulesAlreadyExistsException(targetTournamentId);
         }
 
-        TournamentRules source = rulesRepository.findByEventId(sourceEventId)
-                .orElseThrow(() -> new EventNotFoundException(sourceEventId));
+        TournamentRules source = rulesRepository.findByTournamentId(sourceTournamentId)
+                .orElseThrow(() -> new EventNotFoundException(sourceTournamentId));
 
         TournamentRules clone = TournamentRules.builder()
-                .event(targetEvent)
+                .tournament(targetTournament)
                 .budgetPo(source.getBudgetPo())
                 .pspPool(source.getPspPool())
                 .maxSkillsPerPlayer(source.getMaxSkillsPerPlayer())

@@ -3,7 +3,7 @@ package com.filsanguinaire.tournament.bo;
 public enum RosterStatus {
 
 	NOT_SUBMITTED,
-	SUBITTED,
+	SUBMITTED,
 	APPROVED,
 	REJECTED
 }

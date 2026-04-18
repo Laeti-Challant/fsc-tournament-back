@@ -22,4 +22,6 @@ public class EventSummaryDTO {
     private LocalDate eventDate;
     
     private EventStatus status;
+    
+    private String type;
 }

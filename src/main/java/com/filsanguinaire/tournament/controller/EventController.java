@@ -33,27 +33,8 @@ public class EventController {
         return ResponseEntity.ok(eventService.getAll());
     }
 
-    @GetMapping("/current")
-    public ResponseEntity<EventDetailDTO> getCurrent() {
-        return ResponseEntity.ok(eventService.getCurrent());
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<EventDetailDTO> getById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(eventService.getById(id));
-    }
-
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<EventDetailDTO> create(@Valid @RequestBody EventCreateUpdateDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventService.create(dto));
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<EventDetailDTO> update(
-            @PathVariable("id") Long id,
-            @Valid @RequestBody EventCreateUpdateDTO dto) {
-        return ResponseEntity.ok(eventService.update(id, dto));
-    }
+    }    
 }

@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +24,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(of = "id")
 
 @Entity
+@Table(name = "match")
 public class Match {
 	@Id
 	@GeneratedValue(strategy =GenerationType.IDENTITY )
@@ -30,6 +32,7 @@ public class Match {
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false,  length = 10)
+	@Builder.Default
 	private MatchStatus status = MatchStatus.PENDING;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -37,10 +40,10 @@ public class Match {
 	private Round round;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "coach1_id")
+	@JoinColumn(name = "coach1_id", nullable = false)
 	private Coach coach1;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "coach2_id")
+	@JoinColumn(name = "coach2_id", nullable = false)
 	private Coach coach2;
 }
