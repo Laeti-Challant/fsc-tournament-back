@@ -24,4 +24,6 @@ public class CoachUpdateDTO {
 	private boolean eating;
 	
 	private boolean vegetarian;
+	
+	private String rosterLink;
 }

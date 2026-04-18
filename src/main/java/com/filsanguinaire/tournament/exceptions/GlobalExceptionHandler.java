@@ -57,6 +57,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleAlreadyRegistered(AlreadyCoachRegisteredException ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
+    
+    // 409 - Les inscriptions sont closes
+    @ExceptionHandler(RegistrationClosedException.class)
+    public ResponseEntity<String> handleRegistrationClosed(RegistrationClosedException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    // 409 - Le tournoi est complet
+    @ExceptionHandler(TournamentFullException.class)
+    public ResponseEntity<String> handleTournamentFull(TournamentFullException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 
     // 401 — Mauvais identifiants
     @ExceptionHandler(BadCredentialsException.class)
@@ -94,6 +106,12 @@ public class GlobalExceptionHandler {
         );
         errors.put("errors", fieldErrors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+    
+    // 400 - données de race incorrectes
+    @ExceptionHandler(InvalidRaceException.class)
+    public ResponseEntity<String> handleInvalidRace(InvalidRaceException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     // 500 - Erreur inattendue

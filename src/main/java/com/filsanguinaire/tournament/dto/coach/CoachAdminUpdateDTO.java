@@ -2,6 +2,7 @@ package com.filsanguinaire.tournament.dto.coach;
 
 import com.filsanguinaire.tournament.bo.CoachStatus;
 import com.filsanguinaire.tournament.bo.RosterStatus;
+import com.sun.istack.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,31 +13,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CoachDetailDTO {
+public class CoachAdminUpdateDTO {
 
-	private Long id;
-	
-	private String coachPseudo;
-	
-	private String teamName;
-	
-	private String race;
-	
-	private boolean eating;
-	
-	private boolean vegetarian;
-	
+	@NotNull
 	private CoachStatus status;
 	
+	@NotNull
 	private RosterStatus rosterStatus;
 	
-	private String rosterLink;
-	
 	private boolean substitute;
-	
-	private Long userId;
-	
-	private String userPseudo;
-	
-	private String userEmail;
 }
