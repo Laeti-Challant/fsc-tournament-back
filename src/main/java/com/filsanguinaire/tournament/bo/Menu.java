@@ -33,6 +33,9 @@ public class Menu {
 	@Column(length = 255)
 	private String description;
 	
+	@Column(nullable = false)
+	private Integer displayOrder;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "Tournament_id", nullable = false)
 	private Tournament tournament;

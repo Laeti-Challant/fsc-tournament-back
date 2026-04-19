@@ -26,4 +26,10 @@ public interface CoachRepository extends JpaRepository<Coach, Long> {
 
     // Liste des coaches validés (non paginée)
     List<Coach> findByEventIdAndStatus(Long eventId, CoachStatus status);
+    
+ // Liste des coaches validés ET non remplaçants (page participants publique)
+    List<Coach> findByEventIdAndStatusAndSubstituteFalse(Long eventId, CoachStatus status);
+
+    // Liste des coaches validés qui mangent sur place (page admin repas)
+    List<Coach> findByEventIdAndStatusAndEatingTrue(Long eventId, CoachStatus status);
 }
