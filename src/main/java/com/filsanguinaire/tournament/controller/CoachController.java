@@ -1,5 +1,7 @@
 package com.filsanguinaire.tournament.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,8 @@ import com.filsanguinaire.tournament.bll.ICoachService;
 import com.filsanguinaire.tournament.dto.coach.CoachAdminUpdateDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachCreateDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachDetailDTO;
+import com.filsanguinaire.tournament.dto.coach.CoachMealDTO;
+import com.filsanguinaire.tournament.dto.coach.CoachParticipantDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachSummaryDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachUpdateDTO;
 import com.filsanguinaire.tournament.security.UserPrincipal;
@@ -35,14 +39,14 @@ public class CoachController {
 	
 	@GetMapping
     public ResponseEntity<Page<CoachSummaryDTO>> getAll(
-            @PathVariable Long tournamentId,
+            @PathVariable("tournamentId") Long tournamentId,
             Pageable pageable) {
         return ResponseEntity.ok(coachService.getAllByTournament(tournamentId, pageable));
     }
 
 	@GetMapping("/me")
 	public ResponseEntity<CoachDetailDTO> getMyCoach(
-	        @PathVariable Long tournamentId,
+	        @PathVariable("tournamentId") Long tournamentId,
 	        Authentication authentication) {
 	    UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
 	    return coachService.getMyCoach(tournamentId, principal.getId()).map(ResponseEntity::ok).orElse(ResponseEntity.noContent().build());
@@ -51,22 +55,27 @@ public class CoachController {
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<CoachDetailDTO> getById(
-	        @PathVariable Long tournamentId,
-	        @PathVariable Long id) {
+	        @PathVariable("tournamentId") Long tournamentId,
+	        @PathVariable("id") Long id) {
 	    return ResponseEntity.ok(coachService.getById(tournamentId, id));
 	}	
 
     @GetMapping("/meals")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<CoachDetailDTO>> getMeals(
-            @PathVariable Long tournamentId,
-            Pageable pageable) {
-        return ResponseEntity.ok(coachService.getMealsByTournament(tournamentId, pageable));
+    public ResponseEntity<List<CoachMealDTO>> getMeals(
+            @PathVariable("tournamentId") Long tournamentId) {
+        return ResponseEntity.ok(coachService.getMealsByTournament(tournamentId));
+    }
+    
+    @GetMapping("/participants")
+    public ResponseEntity<List<CoachParticipantDTO>> getParticipants(
+            @PathVariable("tournamentId") Long tournamentId) {
+        return ResponseEntity.ok(coachService.getValidatedParticipants(tournamentId));
     }
 
     @PostMapping
     public ResponseEntity<CoachDetailDTO> register(
-            @PathVariable Long tournamentId,
+            @PathVariable("tournamentId") Long tournamentId,
             @RequestBody @Valid CoachCreateDTO dto,
             Authentication authentication) {
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
@@ -78,15 +87,15 @@ public class CoachController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CoachDetailDTO> adminUpdate(
-            @PathVariable Long tournamentId,
-            @PathVariable Long id,
+            @PathVariable("tournamentId") Long tournamentId,
+            @PathVariable("id") Long id,
             @RequestBody @Valid CoachAdminUpdateDTO dto) {
         return ResponseEntity.ok(coachService.adminUpdate(tournamentId, id, dto));
     }
     
     @PutMapping("/me")
     public ResponseEntity<CoachDetailDTO> updateMe(
-            @PathVariable Long tournamentId,
+            @PathVariable("tournamentId") Long tournamentId,
             @RequestBody @Valid CoachUpdateDTO dto,
             Authentication authentication) {
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
@@ -96,8 +105,8 @@ public class CoachController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
-            @PathVariable Long tournamentId,
-            @PathVariable Long id) {
+            @PathVariable("tournamentId") Long tournamentId,
+            @PathVariable("id") Long id) {
         coachService.delete(tournamentId, id);
         return ResponseEntity.noContent().build();
     }
