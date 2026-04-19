@@ -64,9 +64,9 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
     
-    // 409 - Les inscriptions sont closes
-    @ExceptionHandler(RegistrationClosedException.class)
-    public ResponseEntity<String> handleRegistrationClosed(RegistrationClosedException ex) {
+    // 409 - Tournoi non éditable 
+    @ExceptionHandler(TournamentNotEditableException.class)
+    public ResponseEntity<String> handleTournamentNoteditable(TournamentNotEditableException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 

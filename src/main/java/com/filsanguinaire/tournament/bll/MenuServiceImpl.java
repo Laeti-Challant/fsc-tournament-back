@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.filsanguinaire.tournament.bo.EventStatus;
 import com.filsanguinaire.tournament.bo.Menu;
 import com.filsanguinaire.tournament.bo.Tournament;
 import com.filsanguinaire.tournament.dal.MenuRepository;
@@ -13,6 +14,7 @@ import com.filsanguinaire.tournament.dto.menu.MenuCreateUpdateDTO;
 import com.filsanguinaire.tournament.dto.menu.MenuDTO;
 import com.filsanguinaire.tournament.exceptions.EventNotFoundException;
 import com.filsanguinaire.tournament.exceptions.MenuNotFoundException;
+import com.filsanguinaire.tournament.exceptions.TournamentNotEditableException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,6 +43,10 @@ public class MenuServiceImpl implements IMenuService {
 		Tournament tournament = tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new EventNotFoundException(tournamentId));
 
+		if (tournament.getStatus() != EventStatus.PLANNED) {
+			throw new TournamentNotEditableException();
+		}
+		
         Menu menu = Menu.builder()
                 .label(dto.getLabel())
                 .description(dto.getDescription())
@@ -53,10 +59,18 @@ public class MenuServiceImpl implements IMenuService {
 	@Override
 	@Transactional
 	public MenuDTO update(Long tournamentId, Long menuId, MenuCreateUpdateDTO dto) {
+		Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new EventNotFoundException(tournamentId));
+
+		if (tournament.getStatus() != EventStatus.PLANNED) {
+			throw new TournamentNotEditableException();
+		}
+		
 		Menu menu = menuRepository.findById(menuId)
                 .filter(m -> m.getTournament().getId().equals(tournamentId))
                 .orElseThrow(() -> new MenuNotFoundException(menuId));
 
+		
         menu.setLabel(dto.getLabel());
         menu.setDescription(dto.getDescription());
 
@@ -66,6 +80,13 @@ public class MenuServiceImpl implements IMenuService {
 	@Override
 	@Transactional
 	public void delete(Long tournamentId, Long menuId) {
+		Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new EventNotFoundException(tournamentId));
+
+		if (tournament.getStatus() != EventStatus.PLANNED) {
+			throw new TournamentNotEditableException();
+		}
+		
 		Menu menu = menuRepository.findById(menuId)
                 .filter(m -> m.getTournament().getId().equals(tournamentId))
                 .orElseThrow(() -> new MenuNotFoundException(menuId));

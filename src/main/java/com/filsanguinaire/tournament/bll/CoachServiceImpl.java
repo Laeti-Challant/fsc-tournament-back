@@ -31,7 +31,7 @@ import com.filsanguinaire.tournament.exceptions.AlreadyCoachRegisteredException;
 import com.filsanguinaire.tournament.exceptions.CoachNotFoundException;
 import com.filsanguinaire.tournament.exceptions.EventNotFoundException;
 import com.filsanguinaire.tournament.exceptions.InvalidRaceException;
-import com.filsanguinaire.tournament.exceptions.RegistrationClosedException;
+import com.filsanguinaire.tournament.exceptions.TournamentNotEditableException;
 import com.filsanguinaire.tournament.exceptions.TournamentFullException;
 import com.filsanguinaire.tournament.exceptions.UserNotFoundException;
 
@@ -96,11 +96,11 @@ public class CoachServiceImpl implements ICoachService {
 		Tournament tournament = tournamentRepository.findById(tournamentId).orElseThrow(() -> new EventNotFoundException(tournamentId));
 		
 		if (tournament.getStatus() != EventStatus.PLANNED) {
-			throw new RegistrationClosedException();
+			throw new TournamentNotEditableException();
 		}
 		
 		if (LocalDate.now().isAfter(tournament.getRegistrationDeadline())) {
-			throw new RegistrationClosedException();
+			throw new TournamentNotEditableException();
 		}
 		
 		long currentCount = coachRepository.countByEventIdAndStatusIn(tournamentId, List.of(CoachStatus.PENDING, CoachStatus.VALIDATED));
@@ -174,7 +174,7 @@ public class CoachServiceImpl implements ICoachService {
 		Tournament tournament = tournamentRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
 		
 		if (tournament.getStatus() != EventStatus.PLANNED) {
-			throw new RegistrationClosedException();
+			throw new TournamentNotEditableException();
 		}
 		
 		if (!coach.getRace().equalsIgnoreCase(dto.getRace())) {
