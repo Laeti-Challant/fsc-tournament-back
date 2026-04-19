@@ -33,6 +33,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleCoachNotFound(CoachNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+    
+    // 404 - Menu introuvable
+    @ExceptionHandler(MenuNotFoundException.class)
+    public ResponseEntity<String> handleMenuNotFound(MenuNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
 
     // 409 - Ruleset déjà existant pour cet event
     @ExceptionHandler(RulesAlreadyExistsException.class)
@@ -58,9 +64,9 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
     
-    // 409 - Les inscriptions sont closes
-    @ExceptionHandler(RegistrationClosedException.class)
-    public ResponseEntity<String> handleRegistrationClosed(RegistrationClosedException ex) {
+    // 409 - Tournoi non éditable 
+    @ExceptionHandler(TournamentNotEditableException.class)
+    public ResponseEntity<String> handleTournamentNoteditable(TournamentNotEditableException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
