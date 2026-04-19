@@ -33,6 +33,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleCoachNotFound(CoachNotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+    
+    // 404 - Menu introuvable
+    @ExceptionHandler(MenuNotFoundException.class)
+    public ResponseEntity<String> handleMenuNotFound(MenuNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
 
     // 409 - Ruleset déjà existant pour cet event
     @ExceptionHandler(RulesAlreadyExistsException.class)
