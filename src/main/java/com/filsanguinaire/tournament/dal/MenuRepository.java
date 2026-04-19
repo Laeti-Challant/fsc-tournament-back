@@ -8,5 +8,5 @@ import com.filsanguinaire.tournament.bo.Menu;
 
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 
-	List<Menu> findByTournamentId(Long tournamentId);
+	List<Menu> findByTournamentIdOrderByDisplayOrderAsc(Long tournamentId);
 }

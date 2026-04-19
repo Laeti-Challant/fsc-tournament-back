@@ -20,4 +20,5 @@ public class MenuCreateUpdateDTO {
 	@Size(max = 255)
 	private String description;
 	
+	private Integer displayOrder;
 }

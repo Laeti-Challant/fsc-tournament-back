@@ -31,7 +31,7 @@ public class MenuServiceImpl implements IMenuService {
 		if (!tournamentRepository.existsById(tournamentId)) {
             throw new EventNotFoundException(tournamentId);
         }
-        return menuRepository.findByTournamentId(tournamentId)
+        return menuRepository.findByTournamentIdOrderByDisplayOrderAsc(tournamentId)
                 .stream()
                 .map(this::toDTO)
                 .toList();
@@ -40,20 +40,24 @@ public class MenuServiceImpl implements IMenuService {
 	@Override
 	@Transactional
 	public MenuDTO create(Long tournamentId, MenuCreateUpdateDTO dto) {
-		Tournament tournament = tournamentRepository.findById(tournamentId)
-                .orElseThrow(() -> new EventNotFoundException(tournamentId));
+	    Tournament tournament = tournamentRepository.findById(tournamentId)
+	            .orElseThrow(() -> new EventNotFoundException(tournamentId));
 
-		if (tournament.getStatus() != EventStatus.PLANNED) {
-			throw new TournamentNotEditableException();
-		}
-		
-        Menu menu = Menu.builder()
-                .label(dto.getLabel())
-                .description(dto.getDescription())
-                .tournament(tournament)
-                .build();
+	    if (tournament.getStatus() != EventStatus.PLANNED) {
+	        throw new TournamentNotEditableException();
+	    }
 
-        return toDTO(menuRepository.save(menu));
+	    List<Menu> existing = menuRepository.findByTournamentIdOrderByDisplayOrderAsc(tournamentId);
+	    int nextOrder = existing.isEmpty() ? 1 : existing.getLast().getDisplayOrder() + 1;
+
+	    Menu menu = Menu.builder()
+	            .label(dto.getLabel())
+	            .description(dto.getDescription())
+	            .displayOrder(nextOrder)
+	            .tournament(tournament)
+	            .build();
+
+	    return toDTO(menuRepository.save(menu));
 	}
 
 	@Override
@@ -71,8 +75,11 @@ public class MenuServiceImpl implements IMenuService {
                 .orElseThrow(() -> new MenuNotFoundException(menuId));
 
 		
-        menu.setLabel(dto.getLabel());
-        menu.setDescription(dto.getDescription());
+		menu.setLabel(dto.getLabel());
+		menu.setDescription(dto.getDescription());
+		if (dto.getDisplayOrder() != null) {
+		    menu.setDisplayOrder(dto.getDisplayOrder());
+		}
 
         return toDTO(menuRepository.save(menu));
 	}
@@ -99,6 +106,7 @@ public class MenuServiceImpl implements IMenuService {
                 .id(menu.getId())
                 .label(menu.getLabel())
                 .description(menu.getDescription())
+                .displayOrder(menu.getDisplayOrder())
                 .build();
     }
 

@@ -16,4 +16,6 @@ public class MenuDTO {
     private String label;
     
     private String description;
+    
+    private Integer displayOrder;
 }
