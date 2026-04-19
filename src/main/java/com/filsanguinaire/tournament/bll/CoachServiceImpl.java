@@ -23,6 +23,8 @@ import com.filsanguinaire.tournament.dal.UserRepository;
 import com.filsanguinaire.tournament.dto.coach.CoachAdminUpdateDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachCreateDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachDetailDTO;
+import com.filsanguinaire.tournament.dto.coach.CoachMealDTO;
+import com.filsanguinaire.tournament.dto.coach.CoachParticipantDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachSummaryDTO;
 import com.filsanguinaire.tournament.dto.coach.CoachUpdateDTO;
 import com.filsanguinaire.tournament.exceptions.AlreadyCoachRegisteredException;
@@ -74,8 +76,14 @@ public class CoachServiceImpl implements ICoachService {
 
 	@Override
 	@Transactional
-	public Page<CoachDetailDTO> getMealsByTournament(Long tournamentId, Pageable pageable) {
-		return coachRepository.findByEventId(tournamentId, pageable).map(this::toDetailDTO);
+	public List<CoachMealDTO> getMealsByTournament(Long tournamentId) {
+		if (!eventRepository.existsById(tournamentId)) {
+			throw new EventNotFoundException(tournamentId);
+		}
+		return coachRepository.findByEventIdAndStatusAndEatingTrue(tournamentId, CoachStatus.VALIDATED)
+	            .stream()
+	            .map(this::toMealDTO)
+	            .toList();
 	}
 
 	@Override
@@ -134,6 +142,18 @@ public class CoachServiceImpl implements ICoachService {
 	    coach.setSubstitute(dto.isSubstitute());
 
 	    return toDetailDTO(coachRepository.save(coach));
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<CoachParticipantDTO> getValidatedParticipants(Long tournamentId) {
+	    if (!eventRepository.existsById(tournamentId)) {
+	        throw new EventNotFoundException(tournamentId);
+	    }
+	    return coachRepository.findByEventIdAndStatusAndSubstituteFalse(tournamentId, CoachStatus.VALIDATED)
+	            .stream()
+	            .map(this::toParticipantDTO)
+	            .toList();
 	}
 
 	@Override
@@ -202,6 +222,25 @@ public class CoachServiceImpl implements ICoachService {
                 .userId(coach.getUser().getId())
                 .userPseudo(coach.getUser().getPseudo())
                 .userEmail(coach.getUser().getEmail())
+                .build();
+    }
+    
+    private CoachMealDTO toMealDTO(Coach coach) {
+        return CoachMealDTO.builder()
+                .id(coach.getId())
+                .coachPseudo(coach.getCoachPseudo())
+                .teamName(coach.getTeamName())
+                .race(coach.getRace())
+                .vegetarian(coach.isVegetarian())
+                .build();
+    }
+
+    private CoachParticipantDTO toParticipantDTO(Coach coach) {
+        return CoachParticipantDTO.builder()
+                .id(coach.getId())
+                .coachPseudo(coach.getCoachPseudo())
+                .teamName(coach.getTeamName())
+                .race(coach.getRace())
                 .build();
     }
 }
