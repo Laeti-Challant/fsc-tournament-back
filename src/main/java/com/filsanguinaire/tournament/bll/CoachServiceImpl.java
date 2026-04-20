@@ -34,6 +34,7 @@ import com.filsanguinaire.tournament.exceptions.InvalidRaceException;
 import com.filsanguinaire.tournament.exceptions.TournamentNotEditableException;
 import com.filsanguinaire.tournament.exceptions.TournamentFullException;
 import com.filsanguinaire.tournament.exceptions.UserNotFoundException;
+import com.filsanguinaire.tournament.mapper.CoachMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -51,12 +52,14 @@ public class CoachServiceImpl implements ICoachService {
     
     private final TournamentRulesRepository tournamentRulesRepository;
     
+    private final CoachMapper coachMapper;
+    
 	@Override
 	public Page<CoachSummaryDTO> getAllByTournament(Long tournamentId, Pageable pageable) {
 		if (!eventRepository.existsById(tournamentId) ) {
 			throw new EventNotFoundException(tournamentId);
 		}
-		return coachRepository.findByEventId(tournamentId, pageable).map(this::toSummaryDTO);
+		return coachRepository.findByEventId(tournamentId, pageable).map(coachMapper::toSummaryDTO);
 	}
 
 	@Override
@@ -196,18 +199,7 @@ public class CoachServiceImpl implements ICoachService {
 	    return toDetailDTO(coachRepository.save(coach));
 	}
 	
-	private CoachSummaryDTO toSummaryDTO(Coach coach) {
-        return CoachSummaryDTO.builder()
-                .id(coach.getId())
-                .coachPseudo(coach.getCoachPseudo())
-                .teamName(coach.getTeamName())
-                .race(coach.getRace())
-                .status(coach.getStatus())
-                .rosterStatus(coach.getRosterStatus())
-                .build();
-    }
-
-    private CoachDetailDTO toDetailDTO(Coach coach) {
+	private CoachDetailDTO toDetailDTO(Coach coach) {
         return CoachDetailDTO.builder()
                 .id(coach.getId())
                 .coachPseudo(coach.getCoachPseudo())
