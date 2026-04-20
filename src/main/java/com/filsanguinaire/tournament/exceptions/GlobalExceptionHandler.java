@@ -36,8 +36,26 @@ public class GlobalExceptionHandler {
     
     // 404 - Menu introuvable
     @ExceptionHandler(MenuNotFoundException.class)
-    public ResponseEntity<String> handleMenuNotFound(MenuNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    public ResponseEntity<Map<String, Object>> handleMenuNotFound(MenuNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+    
+    // 404 - Round introuvable
+    @ExceptionHandler(RoundNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleRoundNotFound(RoundNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    // 404 - Match introuvable
+    @ExceptionHandler(MatchNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleMatchNotFound(MatchNotFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    // 409 - Coach déjà présent dans ce round (défi)
+    @ExceptionHandler(ChallengeAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleChallengeAlreadyExists(ChallengeAlreadyExistsException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     // 409 - Ruleset déjà existant pour cet event
@@ -66,14 +84,14 @@ public class GlobalExceptionHandler {
     
     // 409 - Tournoi non éditable 
     @ExceptionHandler(TournamentNotEditableException.class)
-    public ResponseEntity<String> handleTournamentNoteditable(TournamentNotEditableException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleTournamentNoteditable(TournamentNotEditableException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     // 409 - Le tournoi est complet
     @ExceptionHandler(TournamentFullException.class)
-    public ResponseEntity<String> handleTournamentFull(TournamentFullException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleTournamentFull(TournamentFullException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     // 401 — Mauvais identifiants
@@ -116,8 +134,14 @@ public class GlobalExceptionHandler {
     
     // 400 - données de race incorrectes
     @ExceptionHandler(InvalidRaceException.class)
-    public ResponseEntity<String> handleInvalidRace(InvalidRaceException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleInvalidRace(InvalidRaceException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+    
+    // 400 - Appariement impossible (nombre impair, doublon...)
+    @ExceptionHandler(PairingException.class)
+    public ResponseEntity<Map<String, Object>> handlePairingException(PairingException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     // 500 - Erreur inattendue
