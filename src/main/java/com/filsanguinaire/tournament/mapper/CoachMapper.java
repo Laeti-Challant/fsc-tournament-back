@@ -1,7 +1,11 @@
 package com.filsanguinaire.tournament.mapper;
 
+import org.springframework.stereotype.Service;
+
 import com.filsanguinaire.tournament.bo.Coach;
 import com.filsanguinaire.tournament.dto.coach.CoachSummaryDTO;
+
+@Service
 
 public class CoachMapper {
 
