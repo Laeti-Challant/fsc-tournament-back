@@ -2,9 +2,12 @@ package com.filsanguinaire.tournament.bll;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
 
 import com.filsanguinaire.tournament.bo.Coach;
 import com.filsanguinaire.tournament.bo.CoachStatus;
@@ -18,6 +21,10 @@ import com.filsanguinaire.tournament.exceptions.PairingException;
 import com.filsanguinaire.tournament.exceptions.RoundNotFoundException;
 import com.filsanguinaire.tournament.mapper.CoachMapper;
 
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
 public class PairingServiceImpl implements IPairingsService {
 
 	private final RoundRepository roundRepository;
@@ -37,9 +44,11 @@ public class PairingServiceImpl implements IPairingsService {
 
         // 3. Coaches déjà appariés dans ce round (les défis pré-créés)
         List<Match> existingMatches = matchRepository.findByRoundId(roundId);
-        Set<Long> alreadyPairedIds = existingMatches.stream()
-                .flatMap(m -> Stream.of(m.getCoach1().getId(), m.getCoach2().getId()))
-                .collect(Collectors.toSet());
+        Set<Long> alreadyPairedIds = new HashSet<>();
+        existingMatches.forEach(m -> {
+        	alreadyPairedIds.add(m.getCoach1().getId());
+        	alreadyPairedIds.add(m.getCoach2().getId());
+        });
 
         // 4. Coaches restants à apparier
         List<Coach> remaining = allCoaches.stream()
