@@ -52,6 +52,13 @@ public class CoachResultServiceImpl implements ICoachResultService {
 	public List<CoachResultDTO> create(Long eventId, Long roundId, Long matchId, MatchResultCreateDTO dto) {
 		Match match = findMatchOrThrow(eventId, roundId, matchId);
 
+		if (!match.getCoach1().getId().equals(dto.getCoach1Result().getCoachId()) ||
+			    !match.getCoach2().getId().equals(dto.getCoach2Result().getCoachId())) {
+			    throw new InvalidResultException(
+			        "Les coaches du résultat ne correspondent pas aux coaches du match."
+			    );
+			}
+		
         if (coachResultRepository.existsByMatch_Id(matchId)) {
             throw new ResultAlreadyExistsException(matchId);
         }
@@ -76,7 +83,14 @@ public class CoachResultServiceImpl implements ICoachResultService {
 
 	@Override
 	public List<CoachResultDTO> update(Long eventId, Long roundId, Long matchId, MatchResultCreateDTO dto) {
-		findMatchOrThrow(eventId, roundId, matchId);
+		Match match = findMatchOrThrow(eventId, roundId, matchId);
+		
+		if (!match.getCoach1().getId().equals(dto.getCoach1Result().getCoachId()) ||
+			    !match.getCoach2().getId().equals(dto.getCoach2Result().getCoachId())) {
+			    throw new InvalidResultException(
+			        "Les coaches du résultat ne correspondent pas aux coaches du match."
+			    );
+			}
 		
 		if (!coachResultRepository.existsByMatch_Id(matchId)) {
 			throw new InvalidResultException(
