@@ -6,17 +6,23 @@ import org.springframework.stereotype.Service;
 
 import com.filsanguinaire.tournament.bo.Coach;
 import com.filsanguinaire.tournament.bo.CoachStatus;
+import com.filsanguinaire.tournament.bo.Event;
+import com.filsanguinaire.tournament.bo.EventStatus;
 import com.filsanguinaire.tournament.bo.Match;
 import com.filsanguinaire.tournament.bo.Round;
 import com.filsanguinaire.tournament.dal.CoachRepository;
+import com.filsanguinaire.tournament.dal.EventRepository;
 import com.filsanguinaire.tournament.dal.MatchRepository;
 import com.filsanguinaire.tournament.dal.RoundRepository;
 import com.filsanguinaire.tournament.dto.match.MatchCreateDTO;
 import com.filsanguinaire.tournament.dto.match.MatchDTO;
 import com.filsanguinaire.tournament.exceptions.ChallengeAlreadyExistsException;
 import com.filsanguinaire.tournament.exceptions.CoachNotFoundException;
+import com.filsanguinaire.tournament.exceptions.CoachNotValidatedException;
+import com.filsanguinaire.tournament.exceptions.EventNotFoundException;
 import com.filsanguinaire.tournament.exceptions.MatchNotFoundException;
 import com.filsanguinaire.tournament.exceptions.RoundNotFoundException;
+import com.filsanguinaire.tournament.exceptions.TournamentNotEditableException;
 import com.filsanguinaire.tournament.mapper.CoachMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +34,7 @@ public class MatchServiceImpl implements IMatchService {
 	private final MatchRepository matchRepository;
 	private final RoundRepository roundRepository;
 	private final CoachRepository coachRepository;
+	private final EventRepository eventRepository;
 	private final CoachMapper coachMapper;
 
 	@Override
@@ -50,22 +57,17 @@ public class MatchServiceImpl implements IMatchService {
 	}
 
 	@Override
-	public MatchDTO create(Long eventId, Long roundId, MatchCreateDTO dto) {
-		Round round = roundRepository.findByIdAndEventId(roundId, eventId)
-				.orElseThrow(() -> new RoundNotFoundException(roundId, eventId));
-
-		Coach coach1 = getValidatedCoach(dto.getCoach1Id(), eventId);
-		Coach coach2 = getValidatedCoach(dto.getCoach2Id(), eventId);
-
-		Match match = Match.builder().round(round).coach1(coach1).coach2(coach2).build();
-
-		return toDTO(matchRepository.save(match));
-	}
-
-	@Override
 	public MatchDTO createChallenge(Long eventId, Long roundId, MatchCreateDTO dto) {
 		Round round = roundRepository.findByIdAndEventId(roundId, eventId)
 				.orElseThrow(() -> new RoundNotFoundException(roundId, eventId));
+		
+		Event event = eventRepository.findById(eventId)
+		        .orElseThrow(() -> new EventNotFoundException(eventId));
+
+		if (event.getStatus() == EventStatus.IN_PROGRESS
+		        || event.getStatus() == EventStatus.FINISHED) {
+		    throw new TournamentNotEditableException();
+		}
 
 		Coach coach1 = getValidatedCoach(dto.getCoach1Id(), eventId);
 		Coach coach2 = getValidatedCoach(dto.getCoach2Id(), eventId);
@@ -86,10 +88,10 @@ public class MatchServiceImpl implements IMatchService {
 	private Coach getValidatedCoach(Long coachId, Long eventId) {
 		Coach coach = coachRepository.findById(coachId).orElseThrow(() -> new CoachNotFoundException(coachId));
 		if (coach.getStatus() != CoachStatus.VALIDATED) {
-			throw new IllegalArgumentException("Le coach " + coach.getCoachPseudo() + " n'est pas validé");
+			throw new CoachNotValidatedException(coach.getCoachPseudo());
 		}
 		if (!coach.getEvent().getId().equals(eventId)) {
-			throw new IllegalArgumentException("Le coach " + coach.getCoachPseudo() + " n'appartient pas à cet event");
+			throw new CoachNotValidatedException(coach.getCoachPseudo());
 		}
 		return coach;
 	}

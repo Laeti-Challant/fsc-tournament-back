@@ -93,6 +93,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleTournamentFull(TournamentFullException ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
+    
+    // 409 - Rounds déjà générés pour cet event
+    @ExceptionHandler(RoundsAlreadyGeneratedException.class)
+    public ResponseEntity<Map<String, Object>> handleRoundsAlreadyGenerated(RoundsAlreadyGeneratedException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
 
     // 401 — Mauvais identifiants
     @ExceptionHandler(BadCredentialsException.class)
@@ -141,6 +147,12 @@ public class GlobalExceptionHandler {
     // 400 - Appariement impossible (nombre impair, doublon...)
     @ExceptionHandler(PairingException.class)
     public ResponseEntity<Map<String, Object>> handlePairingException(PairingException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+    
+    // 400 - Coach non validé
+    @ExceptionHandler(CoachNotValidatedException.class)
+    public ResponseEntity<Map<String, Object>> handleCoachNotValidated(CoachNotValidatedException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 

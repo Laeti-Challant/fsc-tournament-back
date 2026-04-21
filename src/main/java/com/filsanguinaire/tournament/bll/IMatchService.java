@@ -9,9 +9,7 @@ public interface IMatchService {
 
 	List<MatchDTO> findAllByRound(Long eventId, Long roundId);
 	
-    MatchDTO findByIdAndRound(Long id, Long roundId, Long eventId);
-    
-    MatchDTO create(Long eventId, Long roundId, MatchCreateDTO dto);
+    MatchDTO findByIdAndRound(Long id, Long roundId, Long eventId);    
     
     MatchDTO createChallenge(Long eventId, Long roundId, MatchCreateDTO dto);
 }

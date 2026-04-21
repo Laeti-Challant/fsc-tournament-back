@@ -8,35 +8,51 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.filsanguinaire.tournament.bo.Coach;
 import com.filsanguinaire.tournament.bo.CoachStatus;
+import com.filsanguinaire.tournament.bo.Event;
+import com.filsanguinaire.tournament.bo.EventStatus;
 import com.filsanguinaire.tournament.bo.Match;
 import com.filsanguinaire.tournament.bo.Round;
 import com.filsanguinaire.tournament.dal.CoachRepository;
+import com.filsanguinaire.tournament.dal.EventRepository;
 import com.filsanguinaire.tournament.dal.MatchRepository;
 import com.filsanguinaire.tournament.dal.RoundRepository;
 import com.filsanguinaire.tournament.dto.match.MatchDTO;
+import com.filsanguinaire.tournament.exceptions.EventNotFoundException;
 import com.filsanguinaire.tournament.exceptions.PairingException;
 import com.filsanguinaire.tournament.exceptions.RoundNotFoundException;
+import com.filsanguinaire.tournament.exceptions.TournamentNotEditableException;
 import com.filsanguinaire.tournament.mapper.CoachMapper;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class PairingServiceImpl implements IPairingsService {
+public class PairingServiceImpl implements IPairingService {
 
 	private final RoundRepository roundRepository;
     private final MatchRepository matchRepository;
     private final CoachRepository coachRepository;
+    private final EventRepository eventRepository;
     private final CoachMapper coachMapper;
     
 	@Override
-	public List<MatchDTO> generatepairings(Long eventId, Long roundId) {
-		// 1. Vérifie que le round appartient à l'event
+	@Transactional
+	public List<MatchDTO> generatePairings(Long eventId, Long roundId) {
+		// 1. Vérifie que le round appartient à l'event et que l'event est bien PLANNED ou RGISTRATION_CLOSED
         Round round = roundRepository.findByIdAndEventId(roundId, eventId)
                 .orElseThrow(() -> new RoundNotFoundException(roundId, eventId));
+        
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException(eventId));
+
+        if (event.getStatus() == EventStatus.IN_PROGRESS
+                || event.getStatus() == EventStatus.FINISHED) {
+            throw new TournamentNotEditableException();
+        }
 
         // 2. Tous les coaches validés de l'event (substitutes inclus)
         List<Coach> allCoaches = coachRepository

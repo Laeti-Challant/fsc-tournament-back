@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.filsanguinaire.tournament.dto.match.MatchDTO;
 
-public interface IPairingsService {
+public interface IPairingService {
 
-	List<MatchDTO> generatepairings(Long eventId, Long roundId);
+	List<MatchDTO> generatePairings(Long eventId, Long roundId);
 }
