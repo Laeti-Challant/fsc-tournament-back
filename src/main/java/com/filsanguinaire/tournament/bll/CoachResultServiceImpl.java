@@ -71,7 +71,7 @@ public class CoachResultServiceImpl implements ICoachResultService {
         match.setStatus(MatchStatus.FINISHED);
         matchRepository.save(match);
 
-        return List.of(toDTO(result1), toDTO(result2)
+        return List.of(toDTO(result1), toDTO(result2));
 	}
 
 	@Override
