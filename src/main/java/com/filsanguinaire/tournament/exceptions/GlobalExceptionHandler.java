@@ -99,6 +99,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleRoundsAlreadyGenerated(RoundsAlreadyGeneratedException ex) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
+    
+    // 409 - result du match existent déja
+    @ExceptionHandler(ResultAlreadyExistsException.class)
+    public ResponseEntity<Map<String, Object>> handleResultAlreadyExists(ResultAlreadyExistsException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
 
     // 401 — Mauvais identifiants
     @ExceptionHandler(BadCredentialsException.class)
@@ -153,6 +159,12 @@ public class GlobalExceptionHandler {
     // 400 - Coach non validé
     @ExceptionHandler(CoachNotValidatedException.class)
     public ResponseEntity<Map<String, Object>> handleCoachNotValidated(CoachNotValidatedException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+    
+    // 400 - résultats incohérents
+    @ExceptionHandler(InvalidResultException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidResult(InvalidResultException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 

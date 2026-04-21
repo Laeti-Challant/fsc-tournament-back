@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CoachresultDTO {
+public class CoachResultDTO {
 
 	private Long id;
 	
