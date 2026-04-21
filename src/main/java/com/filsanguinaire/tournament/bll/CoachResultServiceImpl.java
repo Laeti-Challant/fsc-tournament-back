@@ -52,6 +52,13 @@ public class CoachResultServiceImpl implements ICoachResultService {
 	public List<CoachResultDTO> create(Long eventId, Long roundId, Long matchId, MatchResultCreateDTO dto) {
 		Match match = findMatchOrThrow(eventId, roundId, matchId);
 
+		if (!match.getCoach1().getId().equals(dto.getCoach1Result().getCoachId()) ||
+			    !match.getCoach2().getId().equals(dto.getCoach2Result().getCoachId())) {
+			    throw new InvalidResultException(
+			        "Les coaches du résultat ne correspondent pas aux coaches du match."
+			    );
+			}
+		
         if (coachResultRepository.existsByMatch_Id(matchId)) {
             throw new ResultAlreadyExistsException(matchId);
         }
@@ -76,7 +83,20 @@ public class CoachResultServiceImpl implements ICoachResultService {
 
 	@Override
 	public List<CoachResultDTO> update(Long eventId, Long roundId, Long matchId, MatchResultCreateDTO dto) {
-		findMatchOrThrow(eventId, roundId, matchId);
+		Match match = findMatchOrThrow(eventId, roundId, matchId);
+		
+		if (!match.getCoach1().getId().equals(dto.getCoach1Result().getCoachId()) ||
+			    !match.getCoach2().getId().equals(dto.getCoach2Result().getCoachId())) {
+			    throw new InvalidResultException(
+			        "Les coaches du résultat ne correspondent pas aux coaches du match."
+			    );
+			}
+		
+		if (!coachResultRepository.existsByMatch_Id(matchId)) {
+			throw new InvalidResultException(
+			        "Aucun résultat à modifier pour le match id " + matchId
+			    );
+	    }
 
         validateCoherence(dto.getCoach1Result().getResult(),
                           dto.getCoach2Result().getResult());
@@ -89,12 +109,12 @@ public class CoachResultServiceImpl implements ICoachResultService {
         CoachResult existingResult1 = existing.stream()
             .filter(r -> r.getCoach().getId().equals(dto.getCoach1Result().getCoachId()))
             .findFirst()
-            .orElseThrow(InvalidResultException::new);
+            .orElseThrow(() -> new CoachNotFoundException(dto.getCoach1Result().getCoachId()));
 
         CoachResult existingResult2 = existing.stream()
             .filter(r -> r.getCoach().getId().equals(dto.getCoach2Result().getCoachId()))
             .findFirst()
-            .orElseThrow(InvalidResultException::new);
+            .orElseThrow(() -> new CoachNotFoundException(dto.getCoach1Result().getCoachId()));
 
         applyUpdate(existingResult1, dto.getCoach1Result());
         applyUpdate(existingResult2, dto.getCoach2Result());
