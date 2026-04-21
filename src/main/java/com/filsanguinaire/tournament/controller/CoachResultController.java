@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/events/{eventid}/rounds/{roundId}/matches/{matchId}/results")
+@RequestMapping("/events/{eventId}/rounds/{roundId}/matches/{matchId}/results")
 @RequiredArgsConstructor
 public class CoachResultController {
 

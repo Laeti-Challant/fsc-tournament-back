@@ -8,4 +8,8 @@ public class InvalidResultException extends RuntimeException {
 	public InvalidResultException() {
         super("Les résultats sont incohérents : WIN doit être opposé à LOSS, DRAW doit être symétrique.");
     }
+	
+	public InvalidResultException(String message) {
+        super(message);
+    }
 }
