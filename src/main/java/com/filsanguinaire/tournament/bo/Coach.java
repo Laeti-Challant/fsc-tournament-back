@@ -43,9 +43,11 @@ public class Coach {
 	private String race;
 	
 	@Column(nullable = false)
+	@Builder.Default
 	private boolean eating = false;
 	
 	@Column(nullable = false)
+	@Builder.Default
 	private boolean vegetarian = false;
 	
 	@Enumerated(EnumType.STRING)

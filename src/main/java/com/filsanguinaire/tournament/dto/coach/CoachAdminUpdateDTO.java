@@ -2,8 +2,8 @@ package com.filsanguinaire.tournament.dto.coach;
 
 import com.filsanguinaire.tournament.bo.CoachStatus;
 import com.filsanguinaire.tournament.bo.RosterStatus;
-import com.sun.istack.NotNull;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
