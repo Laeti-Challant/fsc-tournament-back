@@ -5,7 +5,11 @@ plugins {
 }
 
 group = 'com.filsanguinaire'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.1'
+
+bootJar {
+    archiveBaseName = 'bb-filsanguinaire'
+}
 
 java {
 	toolchain {
