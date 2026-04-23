@@ -17,13 +17,13 @@ public class TournamentRulesDTO {
     
     private int budgetPo;
     
-    private short pspPool;
+    private int pspPool;
     
-    private short maxSkillsPerPlayer;
+    private int maxSkillsPerPlayer;
     
     private boolean resurrectionMode;
     
-    private short mogettePspValue;
+    private int mogettePspValue;
     
     private int mogettePoValue;
     

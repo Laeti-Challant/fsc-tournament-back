@@ -31,10 +31,10 @@ public class AllowedInducement {
 	private String name;
 	
 	@Column(nullable = false)
-	private short minQty;
+	private int minQty;
 	
 	@Column(nullable = false)
-	private short maxQty;
+	private int maxQty;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "rules_id", nullable = false)

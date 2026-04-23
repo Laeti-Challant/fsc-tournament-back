@@ -36,17 +36,17 @@ public class TournamentRules {
 	private int budgetPo;
 	
 	@Column(nullable = false)
-	private short pspPool;
+	private int pspPool;
 	
 	@Column(nullable = false)
-	private short maxSkillsPerPlayer;
+	private int maxSkillsPerPlayer;
 	
 	@Column(nullable = false)
 	@Builder.Default
 	private boolean resurrectionMode = true;
 	
 	@Column(nullable = false)
-	private short mogettePspValue;
+	private int mogettePspValue;
 	
 	@Column(nullable = false)
 	private int mogettePoValue;

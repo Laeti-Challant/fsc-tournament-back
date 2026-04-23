@@ -34,7 +34,7 @@ public class RosterCategory {
 	private boolean isMinus;
 	
 	@Column(nullable = false)
-	private short categoryValue;
+	private int categoryValue;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "rules_id", nullable = false)

@@ -23,18 +23,18 @@ public class TournamentRulesCreateUpdateDTO {
     
 	@NotNull(message = "Le pool de PSP est obligatoire")
     @Min(value = 0, message = "Le pool de PSP ne peut pas être négatif")
-    private Short pspPool;
+    private Integer pspPool;
     
 	@NotNull(message = "Le nombre max de compétences est obligatoire")
     @Min(value = 0, message = "Le nombre max de compétences ne peut pas être négatif")
-    private Short maxSkillsPerPlayer;
+    private Integer maxSkillsPerPlayer;
     
 	@NotNull(message = "Le mode résurrection est obligatoire")
     private Boolean resurrectionMode;
     
 	@NotNull(message = "La valeur mogette en PSP est obligatoire")
     @Min(value = 0, message = "La valeur mogette PSP ne peut pas être négative")
-    private Short mogettePspValue;
+    private Integer mogettePspValue;
     
 	@NotNull(message = "La valeur mogette en po est obligatoire")
     @Min(value = 0, message = "La valeur mogette po ne peut pas être négative")

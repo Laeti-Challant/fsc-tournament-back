@@ -23,9 +23,9 @@ public class AllowedInducementDTO {
 
     @NotNull(message = "La quantité minimale est obligatoire")
     @Min(value = 0, message = "La quantité minimale ne peut pas être négative")
-    private Short minQty;
+    private Integer minQty;
 
     @NotNull(message = "La quantité maximale est obligatoire")
     @Min(value = 1, message = "La quantité maximale doit être au moins 1")
-    private Short maxQty;
+    private Integer maxQty;
 }

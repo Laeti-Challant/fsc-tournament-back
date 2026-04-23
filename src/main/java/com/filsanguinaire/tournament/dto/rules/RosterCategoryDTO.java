@@ -25,7 +25,7 @@ public class RosterCategoryDTO {
     private String raceName;
 
     @NotNull(message = "La valeur de catégorie est obligatoire")
-    private Short categoryValue;
+    private Integer categoryValue;
     
     @JsonProperty("isMinus")
     private boolean isMinus;
