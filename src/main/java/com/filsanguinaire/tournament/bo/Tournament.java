@@ -38,6 +38,10 @@ public class Tournament extends Event {
     @Column(length = 50)
     private String city;
     
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean featured = false;
+    
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Menu> menus = new ArrayList<>();

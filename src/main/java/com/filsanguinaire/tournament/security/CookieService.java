@@ -14,6 +14,9 @@ public class CookieService {
 
     @Value("${app.cookie.secure}")
     private boolean cookieSecure;
+    
+    @Value("${app.cookie.same-site}")
+    private String cookieSameSite;
 
     public void addJwtCookie(HttpServletResponse response, String token) {
         ResponseCookie cookie = ResponseCookie.from("jwt", token)
@@ -21,7 +24,7 @@ public class CookieService {
                 .secure(cookieSecure)
                 .path("/")
                 .maxAge(Duration.ofDays(1))
-                .sameSite("None")
+                .sameSite(cookieSameSite)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
@@ -32,7 +35,7 @@ public class CookieService {
                 .secure(cookieSecure)
                 .path("/")
                 .maxAge(0)
-                .sameSite("None")
+                .sameSite(cookieSameSite)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }

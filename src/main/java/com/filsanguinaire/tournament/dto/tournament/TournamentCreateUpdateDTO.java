@@ -5,6 +5,7 @@ import com.filsanguinaire.tournament.dto.event.EventCreateUpdateDTO;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -28,4 +29,7 @@ public class TournamentCreateUpdateDTO extends EventCreateUpdateDTO {
 
 	@Size(max = 50)
 	private String city;
+	
+	@Builder.Default
+	private boolean featured = false;
 }

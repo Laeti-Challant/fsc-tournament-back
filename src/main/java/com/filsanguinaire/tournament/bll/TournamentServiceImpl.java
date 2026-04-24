@@ -25,11 +25,22 @@ public class TournamentServiceImpl implements ITournamentService {
 	@Override
 	public EventDetailDTO getCurrentTournament() {
 		Tournament tournament = tournamentRepository
-	            .findFirstByStatusIn(List.of(EventStatus.PLANNED, EventStatus.IN_PROGRESS))
-	            .orElseThrow(() -> new EventNotFoundException(0L));
+	            .findByFeaturedTrue()
+	            .orElseGet(() -> tournamentRepository
+	                    .findFirstByStatusIn(List.of(EventStatus.PLANNED, EventStatus.IN_PROGRESS))
+	                    .orElseThrow(() -> new EventNotFoundException(0L)));
 	    return mapper.toDetailDTO(tournament);
 	}
 
+	@Override
+	public List<EventDetailDTO> getActiveTournaments() {
+	    return tournamentRepository
+	            .findAllByStatusIn(List.of(EventStatus.PLANNED, EventStatus.IN_PROGRESS))
+	            .stream()
+	            .map(mapper::toDetailDTO)
+	            .toList();
+	}
+	
 	@Override
 	public EventDetailDTO create(TournamentCreateUpdateDTO dto) {
 		Tournament tournament = Tournament.builder()
@@ -43,6 +54,7 @@ public class TournamentServiceImpl implements ITournamentService {
                 .address(dto.getAddress())
                 .postalCode(dto.getPostalCode())
                 .city(dto.getCity())
+                .featured(dto.isFeatured())
                 .build();
 
         Tournament saved = tournamentRepository.save(tournament);
@@ -61,7 +73,8 @@ public class TournamentServiceImpl implements ITournamentService {
 	    tournament.setLocation(dto.getLocation());
 	    tournament.setAddress(dto.getAddress());
 	    tournament.setPostalCode(dto.getPostalCode());
-	    tournament.setCity(dto.getCity());	    
+	    tournament.setCity(dto.getCity());
+	    tournament.setFeatured(dto.isFeatured());
 	    
 	    Tournament saved = tournamentRepository.save(tournament);
 	    return mapper.toDetailDTO(saved);
