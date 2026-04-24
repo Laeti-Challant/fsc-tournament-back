@@ -40,5 +40,7 @@ public class EventDetailDTO {
     
     private String city;
     
+    private boolean featured;
+    
     private TournamentRulesDTO rules;
 }
