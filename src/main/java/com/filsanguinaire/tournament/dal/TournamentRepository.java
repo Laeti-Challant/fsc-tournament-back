@@ -11,4 +11,8 @@ import com.filsanguinaire.tournament.bo.Tournament;
 public interface TournamentRepository extends JpaRepository<Tournament, Long> {
 
 	Optional<Tournament> findFirstByStatusIn(List<EventStatus> statuses);
+	
+	List<Tournament> findAllByStatusIn(List<EventStatus> statuses);
+	
+    Optional<Tournament> findByFeaturedTrue();
 }
