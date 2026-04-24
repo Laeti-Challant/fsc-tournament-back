@@ -1,5 +1,7 @@
 package com.filsanguinaire.tournament.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +30,11 @@ public class TournamentController {
 	@GetMapping("/current")
 	public ResponseEntity<EventDetailDTO> getCurrentTournament() {
 		return ResponseEntity.ok(tournamentService.getCurrentTournament());
+	}
+	
+	@GetMapping("/active")
+	public ResponseEntity<List<EventDetailDTO>> getActive() {
+	    return ResponseEntity.ok(tournamentService.getActiveTournaments());
 	}
 	
 	@PostMapping
