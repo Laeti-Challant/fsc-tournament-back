@@ -1,0 +1,14 @@
+{
+  "visible": true,
+  "actif": true,
+  "termine": false,
+  "contexte": "stage",
+  "screenshot": "",
+  "technologies": ["Java", "Spring Boot", "Spring Security", "JWT", "PostgreSQL"],
+  "competences": [
+    "Conception d'une API REST avec Spring Boot",
+    "Authentification et autorisation avec JWT et Spring Security",
+    "Gestion de tournoi : coachs, rounds, matchs et résultats",
+    "Algorithme de pairing automatique des équipes"
+  ]
+}
