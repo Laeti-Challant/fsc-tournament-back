@@ -8,6 +8,8 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -169,6 +171,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidResultException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidResult(InvalidResultException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    // 404 - Route inexistante
+    @ExceptionHandler({ NoResourceFoundException.class, NoHandlerFoundException.class })
+    public ResponseEntity<Map<String, Object>> handleNoResourceFound(Exception ex) {
+        log.warn("Route inconnue : {}", ex.getMessage());
+        return buildResponse(HttpStatus.NOT_FOUND, "Ressource introuvable");
     }
 
     // 500 - Erreur inattendue
