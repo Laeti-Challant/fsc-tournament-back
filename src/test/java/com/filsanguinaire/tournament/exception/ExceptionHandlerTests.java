@@ -24,14 +24,14 @@ public class ExceptionHandlerTests {
 	@Test
 	void shouldReturnHttpRequestMethodNotSupportedException() {
 		// Arrange
-		HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException("GET" );
+		HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException("GET");
 		
 		// Act
 		ResponseEntity<Map<String, Object>> response = handler.handleGeneric(ex);
 		
 		// Assert
 		assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatusCode());
-		assertEquals("Ce chemin n'est pas supporté.", response.getBody().get("message"));
+		assertEquals("Method 'GET' is not supported.", response.getBody().get("message"));
 	}
 	
 }
