@@ -1,10 +1,12 @@
 package com.filsanguinaire.tournament.exceptions;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -183,8 +185,15 @@ public class GlobalExceptionHandler {
     // 500 - Erreur inattendue
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
-        log.error("Erreur non gérée", ex);
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Une erreur inattendue s'est produite");
+    	HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+    	String message = "Une erreur innatendue s'est produite";
+    	if (ex instanceof ErrorResponse errorResponse) {
+    		HttpStatusCode status = errorResponse.getStatusCode();
+    		httpStatus = HttpStatus.resolve(status.value());
+    		message = errorResponse.getBody().getDetail();
+    	}
+    	log.warn("Erreur non gérée", ex);
+		return buildResponse(httpStatus, message);
     }
 
     // Méthode utilitaire pour construire une réponse d'erreur cohérente
