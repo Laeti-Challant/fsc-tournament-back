@@ -1,18 +1,25 @@
 package com.filsanguinaire.tournament.exceptions;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -168,10 +175,25 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    // 404 - Route inexistante
+    @ExceptionHandler({ NoResourceFoundException.class, NoHandlerFoundException.class })
+    public ResponseEntity<Map<String, Object>> handleNoResourceFound(Exception ex) {
+        log.warn("Route inconnue : {}", ex.getMessage());
+        return buildResponse(HttpStatus.NOT_FOUND, "Ressource introuvable");
+    }
+
     // 500 - Erreur inattendue
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Une erreur inattendue s'est produite");
+    	HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+    	String message = "Une erreur innatendue s'est produite";
+    	if (ex instanceof ErrorResponse errorResponse) {
+    		HttpStatusCode status = errorResponse.getStatusCode();
+    		httpStatus = HttpStatus.resolve(status.value());
+    		message = errorResponse.getBody().getDetail();
+    	}
+    	log.warn("Erreur non gérée", ex);
+		return buildResponse(httpStatus, message);
     }
 
     // Méthode utilitaire pour construire une réponse d'erreur cohérente
