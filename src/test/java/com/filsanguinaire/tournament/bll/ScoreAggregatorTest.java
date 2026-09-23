@@ -96,11 +96,11 @@ public class ScoreAggregatorTest {
 		List<ScoreDTO> scoreList = aggregator.aggregate(results);
 
 		assertEquals(2, scoreList.size());
-		ScoreDTO scoreDTO1 = findByCoachId(scoreList, 1L);
-		assertEquals(3, scoreDTO1.getNumberOfTouchdowns());
-		assertEquals(1, scoreDTO1.getNumberOfCasualties());
-		assertEquals(3, scoreDTO1.getNumberOfPasses());
-		assertEquals(5, scoreDTO1.getNumberOfFoulActions());
+		ScoreDTO scoreCoach1 = findByCoachId(scoreList, 1L);
+		assertEquals(3, scoreCoach1.getNumberOfTouchdowns());
+		assertEquals(1, scoreCoach1.getNumberOfCasualties());
+		assertEquals(3, scoreCoach1.getNumberOfPasses());
+		assertEquals(5, scoreCoach1.getNumberOfFoulActions());
 	}
 
 	@Test
@@ -109,10 +109,23 @@ public class ScoreAggregatorTest {
 
 		List<ScoreDTO> scoreList = aggregator.aggregate(results);
 		
-		ScoreDTO scoreDTO2 = findByCoachId(scoreList, 1L);
+		ScoreDTO scoreCoach1 = findByCoachId(scoreList, 1L);
 		
-		assertEquals(1, scoreDTO2.getNumberOfWins());
-		assertEquals(1, scoreDTO2.getNumberOfDraws());
+		assertEquals(1, scoreCoach1.getNumberOfWins());
+		assertEquals(1, scoreCoach1.getNumberOfDraws());
+	}
+	
+	@Test 
+	void shouldCountObjectivesWithBonusObjective() {
+		ScoreAggregator aggregator = new ScoreAggregator();
+
+		List<ScoreDTO> scoreList = aggregator.aggregate(results);
+		
+		ScoreDTO scoreCoach1 = findByCoachId(scoreList, 1L);
+		ScoreDTO scoreCoach2 = findByCoachId(scoreList, 2L);
+		
+		assertEquals(7, scoreCoach1.getNumberOfObjectives());
+		assertEquals(1, scoreCoach2.getNumberOfObjectives());
 	}
 
 	private ScoreDTO findByCoachId(List<ScoreDTO> list, Long coachId) {
