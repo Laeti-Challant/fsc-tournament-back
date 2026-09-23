@@ -64,7 +64,7 @@ public class ScoreAggregatorTest {
 	}
 	
 	@Test
-	void shouldReturnOneForNumberofWins() {
+	void shouldReturnOneForNumberOfWins() {
 		// Arrange
 		ScoreAggregator aggregator = new ScoreAggregator();		
 		
@@ -78,7 +78,21 @@ public class ScoreAggregatorTest {
 		
 	}
 	
-	private ScoreDTO findByCoachId(List<ScoreDTO> results, Long coachId) {
-		return results.stream().filter(s -> s.getCoachId().equals(coachId)).findFirst().orElseThrow();
+	@Test
+	void shouldSumTouchdownsCasualtiesPassesFoulActionsForOneCoach() {
+		ScoreAggregator aggregator = new ScoreAggregator();
+		
+		List<ScoreDTO> scoreList = aggregator.aggregate(results);
+		
+		assertEquals(2,  scoreList.size());
+		ScoreDTO scoreDTO1 = findByCoachId(scoreList, 1L);
+		assertEquals(3, scoreDTO1.getNumberOfTouchdowns());
+		assertEquals(1, scoreDTO1.getNumberOfCasualties());
+		assertEquals(3, scoreDTO1.getNumberOfPasses());
+		assertEquals(5, scoreDTO1.getNumberOfFoulActions());
+	}
+	
+	private ScoreDTO findByCoachId(List<ScoreDTO> list, Long coachId) {
+		return list.stream().filter(s -> s.getCoachId().equals(coachId)).findFirst().orElseThrow();
 	}
 }

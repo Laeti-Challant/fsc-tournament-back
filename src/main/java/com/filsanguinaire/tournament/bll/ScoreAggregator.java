@@ -21,6 +21,10 @@ public class ScoreAggregator {
 			ScoreDTO score = scoresByCoachId.computeIfAbsent(id, k -> ScoreDTO.builder().coachId(k).build());
 		 
 			score.setNumberOfWins(score.getNumberOfWins() + win);
+			score.setNumberOfTouchdowns(score.getNumberOfTouchdowns() + cr.getTouchdowns());
+			score.setNumberOfCasualties(score.getNumberOfCasualties() + cr.getCasualties());
+			score.setNumberOfPasses(score.getNumberOfPasses() + cr.getPasses());
+			score.setNumberOfFoulActions(score.getNumberOfFoulActions() + cr.getFoulActions());
 		}
 
 		return new ArrayList<>(scoresByCoachId.values());
