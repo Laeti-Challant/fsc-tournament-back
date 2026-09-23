@@ -84,7 +84,6 @@ public class ScoreAggregatorTest {
 		List<ScoreDTO> scoreList = aggregator.aggregate(results);
 
 		// Assert
-		assertEquals(2, scoreList.size());
 		assertEquals(1, findByCoachId(scoreList, 1L).getNumberOfWins());
 
 	}
@@ -95,7 +94,6 @@ public class ScoreAggregatorTest {
 
 		List<ScoreDTO> scoreList = aggregator.aggregate(results);
 
-		assertEquals(2, scoreList.size());
 		ScoreDTO scoreCoach1 = findByCoachId(scoreList, 1L);
 		assertEquals(3, scoreCoach1.getNumberOfTouchdowns());
 		assertEquals(1, scoreCoach1.getNumberOfCasualties());
@@ -126,6 +124,18 @@ public class ScoreAggregatorTest {
 		
 		assertEquals(7, scoreCoach1.getNumberOfObjectives());
 		assertEquals(1, scoreCoach2.getNumberOfObjectives());
+	}
+	
+	@Test
+	void shouldGroupResultsByCoach() {
+		ScoreAggregator aggregator = new ScoreAggregator();
+
+		List<ScoreDTO> scoreList = aggregator.aggregate(results);
+		
+		assertEquals(2, scoreList.size());
+		ScoreDTO scoreCoach2 = findByCoachId(scoreList, 2L);
+		assertEquals(1, scoreCoach2.getNumberOfDraws());
+		
 	}
 
 	private ScoreDTO findByCoachId(List<ScoreDTO> list, Long coachId) {
