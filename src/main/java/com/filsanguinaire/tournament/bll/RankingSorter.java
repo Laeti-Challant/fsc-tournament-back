@@ -11,6 +11,7 @@ public class RankingSorter {
 			.comparingInt(ScoreDTO::getNumberOfWins)
 				.thenComparingInt(ScoreDTO::getNumberOfDraws)
 				.thenComparingInt(ScoreDTO::getNumberOfObjectives)
+				.thenComparingInt(ScoreDTO::getNumberOfTouchdowns)
 				.reversed();
 
 	public List<ScoreDTO> generalSort(List<ScoreDTO> scores) {		
