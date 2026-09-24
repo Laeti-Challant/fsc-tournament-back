@@ -4,17 +4,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.filsanguinaire.tournament.bo.CoachResult;
 import com.filsanguinaire.tournament.dto.ranking.ScoreDTO;
 
 public class ScoreAggregator {
-	public List<ScoreDTO> aggregate(List<CoachResult> results) {
+	public List<ScoreDTO> aggregate(List<CoachResult> results, Map<String, Boolean> isMinusByRace) {
 		Map<Long, ScoreDTO> scoresByCoachId = new HashMap<>();
 
 		for (CoachResult cr : results) {
 			long id = cr.getCoach().getId();
-			
+
+			String race = cr.getCoach().getRace();
+
+			boolean coachIsMinus = Optional.ofNullable(isMinusByRace.get(race)).orElseThrow(
+					() -> new IllegalStateException("La race " + race + " n'est pas connue."));
+
 			int win = switch (cr.getResult()) {
 			case WIN -> 1;
 			default -> 0;
@@ -23,12 +29,13 @@ public class ScoreAggregator {
 			case DRAW -> 1;
 			default -> 0;
 			};
-			
+
 			int objectives = cr.isBonusObjective() ? 1 : 0;
 			objectives += cr.getObjectives();
-			
-			ScoreDTO score = scoresByCoachId.computeIfAbsent(id, k -> ScoreDTO.builder().coachId(k).build());
-		 
+
+			ScoreDTO score = scoresByCoachId.computeIfAbsent(id,
+					k -> ScoreDTO.builder().coachId(k).isMinus(coachIsMinus).build());
+
 			score.setNumberOfWins(score.getNumberOfWins() + win);
 			score.setNumberOfDraws(score.getNumberOfDraws() + draw);
 			score.setNumberOfObjectives(score.getNumberOfObjectives() + objectives);

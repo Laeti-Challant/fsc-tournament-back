@@ -1,9 +1,14 @@
 package com.filsanguinaire.tournament.bll;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,13 +21,21 @@ import com.filsanguinaire.tournament.dto.ranking.ScoreDTO;
 public class ScoreAggregatorTest {
 
 	private List<CoachResult> results;
+	
+	private Map<String, Boolean> mapIsMinus;
 
 	@BeforeEach
 	void setUp() {
+		mapIsMinus = new HashMap<String, Boolean>();
+		mapIsMinus.put("Orc", false);
+		mapIsMinus.put("Gobelins", true);
+		
 		Coach coach1 = new Coach();
 		Coach coach2 = new Coach();
 		coach1.setId(1L);
+		coach1.setRace("Gobelins");
 		coach2.setId(2L);
+		coach2.setRace("Orc");
 
 		CoachResult coachResult1 = new CoachResult();
 		coachResult1.setId(1L);
@@ -81,7 +94,7 @@ public class ScoreAggregatorTest {
 		ScoreAggregator aggregator = new ScoreAggregator();
 
 		// Act
-		List<ScoreDTO> scoreList = aggregator.aggregate(results);
+		List<ScoreDTO> scoreList = aggregator.aggregate(results, mapIsMinus);
 
 		// Assert
 		assertEquals(1, findByCoachId(scoreList, 1L).getNumberOfWins());
@@ -92,7 +105,7 @@ public class ScoreAggregatorTest {
 	void shouldSumTouchdownsCasualtiesPassesFoulActionsForOneCoach() {
 		ScoreAggregator aggregator = new ScoreAggregator();
 
-		List<ScoreDTO> scoreList = aggregator.aggregate(results);
+		List<ScoreDTO> scoreList = aggregator.aggregate(results, mapIsMinus);
 
 		ScoreDTO scoreCoach1 = findByCoachId(scoreList, 1L);
 		assertEquals(3, scoreCoach1.getNumberOfTouchdowns());
@@ -105,7 +118,7 @@ public class ScoreAggregatorTest {
 	void shouldCountWinsAndDrawsOnly() {
 		ScoreAggregator aggregator = new ScoreAggregator();
 
-		List<ScoreDTO> scoreList = aggregator.aggregate(results);
+		List<ScoreDTO> scoreList = aggregator.aggregate(results, mapIsMinus);
 		
 		ScoreDTO scoreCoach1 = findByCoachId(scoreList, 1L);
 		
@@ -117,7 +130,7 @@ public class ScoreAggregatorTest {
 	void shouldCountObjectivesWithBonusObjective() {
 		ScoreAggregator aggregator = new ScoreAggregator();
 
-		List<ScoreDTO> scoreList = aggregator.aggregate(results);
+		List<ScoreDTO> scoreList = aggregator.aggregate(results, mapIsMinus);
 		
 		ScoreDTO scoreCoach1 = findByCoachId(scoreList, 1L);
 		ScoreDTO scoreCoach2 = findByCoachId(scoreList, 2L);
@@ -127,10 +140,35 @@ public class ScoreAggregatorTest {
 	}
 	
 	@Test
+	void shouldReturnIsMinusFromRace() {
+		ScoreAggregator aggregator = new ScoreAggregator();
+
+		List<ScoreDTO> scoreList = aggregator.aggregate(results, mapIsMinus);
+		
+		ScoreDTO scoreCoach1 = findByCoachId(scoreList, 1L);
+		ScoreDTO scoreCoach2 = findByCoachId(scoreList, 2L);
+		
+		assertTrue(scoreCoach1.isMinus());
+		assertFalse(scoreCoach2.isMinus());
+	}
+	
+	@Test
+	void shouldThrowWhenRaceNotInMap() {
+		ScoreAggregator aggregator = new ScoreAggregator();
+		Map<String, Boolean> mapWithoutOrc = new HashMap<String, Boolean>();
+		mapWithoutOrc.put("Gobelins", true);
+		
+		IllegalStateException exceptionToAssert = assertThrows(IllegalStateException.class, () -> aggregator.aggregate(results, mapWithoutOrc));
+		
+		assertTrue(exceptionToAssert.getMessage().contains("Orc"));
+		
+	}
+	
+	@Test
 	void shouldGroupResultsByCoach() {
 		ScoreAggregator aggregator = new ScoreAggregator();
 
-		List<ScoreDTO> scoreList = aggregator.aggregate(results);
+		List<ScoreDTO> scoreList = aggregator.aggregate(results, mapIsMinus);
 		
 		assertEquals(2, scoreList.size());
 		ScoreDTO scoreCoach2 = findByCoachId(scoreList, 2L);
