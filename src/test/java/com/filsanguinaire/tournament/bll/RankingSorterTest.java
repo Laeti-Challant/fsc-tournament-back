@@ -103,4 +103,36 @@ public class RankingSorterTest {
 		assertEquals(1L, sortedScores.get(0).getCoachId());
 		assertEquals(2L, sortedScores.get(1).getCoachId());
 	}
+	
+	@Test
+	void shouldBreakTiesByCasualties() {
+		ScoreDTO score1 = ScoreDTO	.builder()
+									.coachId(1L)
+									.numberOfWins(3)
+									.numberOfDraws(1)
+									.numberOfObjectives(10)
+									.numberOfTouchdowns(7)
+									.numberOfCasualties(5)
+									.build();
+		
+		ScoreDTO score2 = ScoreDTO	.builder()
+									.coachId(2L)
+									.numberOfWins(3)
+									.numberOfDraws(1)
+									.numberOfObjectives(10)
+									.numberOfTouchdowns(7)
+									.numberOfCasualties(1)
+									.build();
+		
+		List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
+		scores.add(score2);
+		scores.add(score1);
+
+		RankingSorter sorter = new RankingSorter();
+
+		List<ScoreDTO> sortedScores = sorter.generalSort(scores);
+
+		assertEquals(1L, sortedScores.get(0).getCoachId());
+		assertEquals(2L, sortedScores.get(1).getCoachId());
+	}
 }
