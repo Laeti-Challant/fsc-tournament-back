@@ -6,12 +6,12 @@ import java.util.List;
 import com.filsanguinaire.tournament.dto.ranking.ScoreDTO;
 
 public class RankingSorter {
+	
+	private static final Comparator<ScoreDTO> GENERAL = Comparator.comparingInt(ScoreDTO::getNumberOfWins)
+			.thenComparingInt(ScoreDTO::getNumberOfDraws).reversed();
 
-	public List<ScoreDTO> generalSort(List<ScoreDTO> scores) {
-		
-		Comparator<ScoreDTO> byWins = Comparator.comparingInt(ScoreDTO::getNumberOfWins).reversed();
-		
-		return scores.stream().sorted(byWins).toList();
-		 
+	public List<ScoreDTO> generalSort(List<ScoreDTO> scores) {		
+
+		return scores.stream().sorted(GENERAL).toList();
 	}
 }
