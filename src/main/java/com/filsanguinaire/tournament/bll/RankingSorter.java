@@ -27,7 +27,9 @@ public class RankingSorter {
 		
 		List<ScoreDTO> scoresSorted = scores.stream().sorted(GENERAL).toList();
 		
-		scoresSorted.get(0).setRank(1);
+		if(!scoresSorted.isEmpty()) {
+			scoresSorted.get(0).setRank(1);
+		}
 				
 		for(int i = 1; i < scoresSorted.size(); i++) {			
 			if (SPORTING.compare(scoresSorted.get(i - 1), scoresSorted.get(i)) == 0) {

@@ -1,6 +1,7 @@
 package com.filsanguinaire.tournament.bll;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -225,5 +226,16 @@ public class RankingSorterTest {
 		assertEquals(2, finalScores.get(1).getRank());
 		assertEquals(2, finalScores.get(2).getRank());
 		assertEquals(4, finalScores.get(3).getRank());
+	}
+	
+	@Test
+	void shouldReturnEmptyListWhenNoScores() {
+		List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
+		
+		RankingSorter sorter = new RankingSorter();
+		
+		List<ScoreDTO> finalScores = sorter.finalSort(scores);
+		
+		assertTrue(finalScores.isEmpty());
 	}
 }
