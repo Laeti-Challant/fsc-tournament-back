@@ -7,13 +7,15 @@ import com.filsanguinaire.tournament.dto.ranking.ScoreDTO;
 
 public class RankingSorter {
 	
-	private static final Comparator<ScoreDTO> GENERAL = Comparator
+	private static final Comparator<ScoreDTO> SPORTING = Comparator
 			.comparingInt(ScoreDTO::getNumberOfWins)
 				.thenComparingInt(ScoreDTO::getNumberOfDraws)
 				.thenComparingInt(ScoreDTO::getNumberOfObjectives)
 				.thenComparingInt(ScoreDTO::getNumberOfTouchdowns)
 				.thenComparingInt(ScoreDTO::getNumberOfCasualties)
-				.reversed()
+				.reversed();
+	
+	private static final Comparator<ScoreDTO> GENERAL = SPORTING
 				.thenComparingLong(ScoreDTO::getCoachId);
 
 	public List<ScoreDTO> generalSort(List<ScoreDTO> scores) {		
