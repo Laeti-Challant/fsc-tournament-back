@@ -28,4 +28,6 @@ public class ScoreDTO {
 	private int numberOfPasses;
 	
 	private int numberOfFoulActions;
+	
+	private int rank;
 }

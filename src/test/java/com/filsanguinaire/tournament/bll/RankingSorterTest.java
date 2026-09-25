@@ -167,4 +167,63 @@ public class RankingSorterTest {
 		assertEquals(1L, sortedScores.get(0).getCoachId());
 		assertEquals(2L, sortedScores.get(1).getCoachId());
 	}
+	
+	@Test
+	void shouldShareRankOnPerfectTieAndSkipNext() {
+		ScoreDTO score1 = ScoreDTO	.builder()
+									.coachId(1L)
+									.numberOfWins(3)
+									.numberOfDraws(1)
+									.numberOfObjectives(10)
+									.numberOfTouchdowns(7)
+									.numberOfCasualties(5)
+									.build();
+		
+		ScoreDTO score2 = ScoreDTO	.builder()
+									.coachId(2L)
+									.numberOfWins(3)
+									.numberOfDraws(1)
+									.numberOfObjectives(10)
+									.numberOfTouchdowns(7)
+									.numberOfCasualties(5)
+									.build();
+		
+		ScoreDTO score3 = ScoreDTO	.builder()
+									.coachId(3L)
+									.numberOfWins(5)
+									.numberOfDraws(0)
+									.numberOfObjectives(15)
+									.numberOfTouchdowns(18)
+									.numberOfCasualties(6)
+									.build();
+		
+		ScoreDTO score4 = ScoreDTO	.builder()
+									.coachId(4L)
+									.numberOfWins(1)
+									.numberOfDraws(2)
+									.numberOfObjectives(5)
+									.numberOfTouchdowns(6)
+									.numberOfCasualties(2)
+									.build();
+		
+		List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
+		scores.add(score2);
+		scores.add(score1);
+		scores.add(score3);
+		scores.add(score4);
+
+		RankingSorter sorter = new RankingSorter();
+
+		List<ScoreDTO> finalScores = sorter.finalSort(scores);
+
+		assertEquals(3L, finalScores.get(0).getCoachId());
+		assertEquals(1L, finalScores.get(1).getCoachId());
+		assertEquals(2L, finalScores.get(2).getCoachId());
+		assertEquals(4L, finalScores.get(3).getCoachId());
+		
+		assertEquals(1, finalScores.get(0).getRank());
+		assertEquals(2, finalScores.get(1).getRank());
+		assertEquals(2, finalScores.get(2).getRank());
+		assertEquals(4, finalScores.get(3).getRank());
+	}
 }
