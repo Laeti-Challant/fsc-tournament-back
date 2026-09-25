@@ -13,7 +13,8 @@ public class RankingSorter {
 				.thenComparingInt(ScoreDTO::getNumberOfObjectives)
 				.thenComparingInt(ScoreDTO::getNumberOfTouchdowns)
 				.thenComparingInt(ScoreDTO::getNumberOfCasualties)
-				.reversed();
+				.reversed()
+				.thenComparingLong(ScoreDTO::getCoachId);
 
 	public List<ScoreDTO> generalSort(List<ScoreDTO> scores) {		
 
