@@ -90,4 +90,54 @@ public class RankingServiceImplTest {
 		assertEquals(1, rankings.getGeneralRanking().get(0).getNumberOfWins());		
 	}
 	
+	@Test
+	void shouldIncludeValidatedCoachWithoutResult() {
+		// Arrange
+		Long tournamentId = 1L;
+		
+		RosterCategory rosterCategory = new RosterCategory();
+		rosterCategory.setId(1L);
+		rosterCategory.setRaceName("Orcs");
+		rosterCategory.setMinus(false);
+		
+		List<RosterCategory> rosterList = new ArrayList<RosterCategory>();
+		rosterList.add(rosterCategory);
+		
+		TournamentRules tournamentRules = new TournamentRules();
+		tournamentRules.setRosterCategories(rosterList);
+		Optional<TournamentRules> opt = Optional.of(tournamentRules);
+		
+		Coach coach1 = new Coach();
+		coach1.setId(1L);		
+		coach1.setRace("Orcs");
+		coach1.setStatus(CoachStatus.VALIDATED);
+		Coach coach2 = new Coach();
+		coach2.setId(2L);
+		coach2.setRace("Orcs");
+		coach2.setStatus(CoachStatus.VALIDATED);
+
+		CoachResult coachResult1 = new CoachResult();
+		coachResult1.setId(1L);
+		coachResult1.setCoach(coach1);
+		coachResult1.setResult(MatchResult.WIN);
+		coachResult1.setTouchdowns(2);
+		coachResult1.setCasualties(1);
+		coachResult1.setObjectives(2);
+		coachResult1.setBonusObjective(true);
+		coachResult1.setPasses(2);
+		coachResult1.setFoulActions(2);
+		
+		// stubs
+		when(tournamentRulesRepo.findByTournamentId(tournamentId)).thenReturn(opt);
+		when(coachRepo.findByEventIdAndStatus(tournamentId, CoachStatus.VALIDATED)).thenReturn(List.of(coach1, coach2));
+		when(coachResultRepo.findAllByMatch_Round_Event_Id(tournamentId)).thenReturn(List.of(coachResult1));
+
+		// Act		
+		RankingsDTO rankings = rankingService.getRankings(tournamentId);
+		
+		// Assert
+		assertEquals(2, rankings.getGeneralRanking().size());
+		assertEquals(2L, rankings.getGeneralRanking().get(1).getCoachId());
+		assertEquals(0, rankings.getGeneralRanking().get(1).getNumberOfWins());	
+	}
 }
