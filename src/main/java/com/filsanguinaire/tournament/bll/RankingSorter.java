@@ -64,4 +64,11 @@ public class RankingSorter {
 				.toList();
 		return scoresSorted;
 	}
+	
+	public List<ScoreDTO> foulerSort(List<ScoreDTO> scores) {
+		List<ScoreDTO> scoresSorted = scores.stream()
+				.sorted(Comparator.comparingInt(ScoreDTO::getNumberOfFoulActions).reversed().thenComparing(GENERAL))
+				.toList();
+		return scoresSorted;
+	}
 }
