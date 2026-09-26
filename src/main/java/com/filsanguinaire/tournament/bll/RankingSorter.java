@@ -2,6 +2,7 @@ package com.filsanguinaire.tournament.bll;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.ToIntFunction;
 
 import com.filsanguinaire.tournament.dto.ranking.ScoreDTO;
 
@@ -43,39 +44,28 @@ public class RankingSorter {
 	}
 
 	public List<ScoreDTO> bashlordSort(List<ScoreDTO> scores) {
-		List<ScoreDTO> scoresSorted = scores
-				.stream()
-				.sorted(Comparator.comparingInt(ScoreDTO::getNumberOfCasualties).reversed().thenComparing(GENERAL))				
-				.toList();
-		
-		return scoresSorted;
+		return sortByThenGeneral(scores, ScoreDTO::getNumberOfCasualties);
 	}
 	
 	public List<ScoreDTO> scorerSort(List<ScoreDTO> scores) {
-		List<ScoreDTO> scoresSorted = scores.stream()
-				.sorted(Comparator.comparingInt(ScoreDTO::getNumberOfTouchdowns).reversed().thenComparing(GENERAL))
-				.toList();
-		return scoresSorted;
+		return sortByThenGeneral(scores, ScoreDTO::getNumberOfTouchdowns);
 	}
 	
-	public List<ScoreDTO> passerSort(List<ScoreDTO> scores) {
-		List<ScoreDTO> scoresSorted = scores.stream()
-				.sorted(Comparator.comparingInt(ScoreDTO::getNumberOfPasses).reversed().thenComparing(GENERAL))
-				.toList();
-		return scoresSorted;
+	public List<ScoreDTO> passerSort(List<ScoreDTO> scores) {		
+		return sortByThenGeneral(scores, ScoreDTO::getNumberOfPasses);
 	}
 	
 	public List<ScoreDTO> foulerSort(List<ScoreDTO> scores) {
-		List<ScoreDTO> scoresSorted = scores.stream()
-				.sorted(Comparator.comparingInt(ScoreDTO::getNumberOfFoulActions).reversed().thenComparing(GENERAL))
-				.toList();
-		return scoresSorted;
+		return sortByThenGeneral(scores, ScoreDTO::getNumberOfFoulActions);
 	}
 	
-	public List<ScoreDTO> objectiveSort(List<ScoreDTO> scores) {
-		List<ScoreDTO> scoresSorted = scores.stream()
-				.sorted(Comparator.comparingInt(ScoreDTO::getNumberOfObjectives).reversed().thenComparing(GENERAL))
-				.toList();
-		return scoresSorted;
+	public List<ScoreDTO> objectiveSort(List<ScoreDTO> scores) {		
+		return sortByThenGeneral(scores, ScoreDTO::getNumberOfObjectives);
+	}
+	
+	private List<ScoreDTO> sortByThenGeneral(List<ScoreDTO> scores, ToIntFunction<ScoreDTO> criterion) {
+		return scores	.stream()
+						.sorted(Comparator.comparingInt(criterion).reversed().thenComparing(GENERAL))
+						.toList();
 	}
 }
