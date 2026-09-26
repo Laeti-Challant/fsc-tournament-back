@@ -50,4 +50,11 @@ public class RankingSorter {
 		
 		return scoresSorted;
 	}
+	
+	public List<ScoreDTO> scorerSort(List<ScoreDTO> scores) {
+		List<ScoreDTO> scoresSorted = scores.stream()
+				.sorted(Comparator.comparingInt(ScoreDTO::getNumberOfTouchdowns).reversed().thenComparing(GENERAL))
+				.toList();
+		return scoresSorted;
+	}
 }

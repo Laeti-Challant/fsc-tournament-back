@@ -312,4 +312,79 @@ public class RankingSorterTest {
 		assertEquals(1L, sortedScores.get(1).getCoachId());
 		assertEquals(2L, sortedScores.get(2).getCoachId());
 	}
+	
+	@Test
+	void shouldPutCoachWithMostTouchdownsFirst() {
+		ScoreDTO score1 = ScoreDTO	.builder()
+						.coachId(1L)
+						.numberOfWins(2)
+						.numberOfDraws(2)
+						.numberOfObjectives(10)
+						.numberOfTouchdowns(15)
+						.numberOfCasualties(10)
+						.build();
+
+		ScoreDTO score2 = ScoreDTO	.builder()
+						.coachId(2L)
+						.numberOfWins(3)
+						.numberOfDraws(1)
+						.numberOfObjectives(10)
+						.numberOfTouchdowns(10)
+						.numberOfCasualties(10)
+						.build();		
+		
+		List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
+		scores.add(score2);
+		scores.add(score1);
+		
+		RankingSorter sorter = new RankingSorter();
+		
+		List<ScoreDTO> sortedScores = sorter.scorerSort(scores);
+
+		assertEquals(1L, sortedScores.get(0).getCoachId());
+		assertEquals(2L, sortedScores.get(1).getCoachId());	
+	}
+	
+	@Test
+	void shouldBreakScorerTiesByGeneralRanking() {
+		ScoreDTO score1 = ScoreDTO	.builder()
+						.coachId(1L)
+						.numberOfWins(2)
+						.numberOfDraws(2)
+						.numberOfObjectives(10)
+						.numberOfTouchdowns(15)
+						.numberOfCasualties(10)
+						.build();
+
+		ScoreDTO score2 = ScoreDTO	.builder()
+						.coachId(2L)
+						.numberOfWins(3)
+						.numberOfDraws(1)
+						.numberOfObjectives(10)
+						.numberOfTouchdowns(10)
+						.numberOfCasualties(10)
+						.build();
+		
+		ScoreDTO score3 = ScoreDTO	.builder()
+						.coachId(3L)
+						.numberOfWins(5)
+						.numberOfDraws(0)
+						.numberOfObjectives(10)
+						.numberOfTouchdowns(10)
+						.numberOfCasualties(10)
+						.build();	
+		
+		List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
+		scores.add(score2);
+		scores.add(score1);
+		scores.add(score3);
+		
+		RankingSorter sorter = new RankingSorter();
+		
+		List<ScoreDTO> sortedScores = sorter.scorerSort(scores);
+
+		assertEquals(1L, sortedScores.get(0).getCoachId());
+		assertEquals(3L, sortedScores.get(1).getCoachId());
+		assertEquals(2L, sortedScores.get(2).getCoachId());
+	}
 }
