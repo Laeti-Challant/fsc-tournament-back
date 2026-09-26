@@ -622,4 +622,72 @@ public class RankingSorterTest {
 		assertEquals(3L, sortedScores.get(1).getCoachId());
 		assertEquals(2L, sortedScores.get(2).getCoachId());
 	}
+	
+	@Test
+	void shouldFilterCoachesByIsMinus() {
+		ScoreDTO score1 = ScoreDTO	.builder()
+						.coachId(1L)
+						.isMinus(true)
+						.numberOfWins(2)
+						.numberOfDraws(2)
+						.numberOfTouchdowns(10)
+						.numberOfCasualties(10)
+						.numberOfObjectives(8)
+						.build();
+
+		ScoreDTO score2 = ScoreDTO	.builder()
+						.coachId(2L)
+						.isMinus(false)
+						.numberOfWins(2)
+						.numberOfDraws(2)
+						.numberOfTouchdowns(10)
+						.numberOfCasualties(10)
+						.numberOfObjectives(8)
+						.build();		
+		
+		List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
+		scores.add(score2);
+		scores.add(score1);
+		
+		RankingSorter sorter = new RankingSorter();
+		
+		List<ScoreDTO> minusScores = sorter.minusSort(scores);
+		
+		assertEquals(1, minusScores.size());
+		assertEquals(1L, minusScores.get(0).getCoachId());
+	}
+	
+	@Test
+	void shouldSortMinusCoachesByGeneralRanking() {
+		ScoreDTO score1 = ScoreDTO	.builder()
+						.coachId(1L)
+						.isMinus(true)
+						.numberOfWins(3)
+						.numberOfDraws(2)
+						.numberOfTouchdowns(10)
+						.numberOfCasualties(10)
+						.numberOfObjectives(8)
+						.build();
+
+		ScoreDTO score2 = ScoreDTO	.builder()
+						.coachId(2L)
+						.isMinus(true)
+						.numberOfWins(2)
+						.numberOfDraws(2)
+						.numberOfTouchdowns(10)
+						.numberOfCasualties(10)
+						.numberOfObjectives(8)
+						.build();		
+		
+		List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
+		scores.add(score2);
+		scores.add(score1);
+		
+		RankingSorter sorter = new RankingSorter();
+		
+		List<ScoreDTO> minusScores = sorter.minusSort(scores);
+		
+		assertEquals(1L, minusScores.get(0).getCoachId());
+		assertEquals(2L, minusScores.get(1).getCoachId());	
+	}
 }

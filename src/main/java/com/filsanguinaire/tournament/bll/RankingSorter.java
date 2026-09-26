@@ -63,6 +63,13 @@ public class RankingSorter {
 		return sortByThenGeneral(scores, ScoreDTO::getNumberOfObjectives);
 	}
 	
+	public List<ScoreDTO> minusSort(List<ScoreDTO> scores) {		
+		return scores	.stream()
+						.filter(ScoreDTO::isMinus)
+						.sorted(GENERAL)
+						.toList();
+	}
+	
 	private List<ScoreDTO> sortByThenGeneral(List<ScoreDTO> scores, ToIntFunction<ScoreDTO> criterion) {
 		return scores	.stream()
 						.sorted(Comparator.comparingInt(criterion).reversed().thenComparing(GENERAL))
