@@ -71,4 +71,11 @@ public class RankingSorter {
 				.toList();
 		return scoresSorted;
 	}
+	
+	public List<ScoreDTO> objectiveSort(List<ScoreDTO> scores) {
+		List<ScoreDTO> scoresSorted = scores.stream()
+				.sorted(Comparator.comparingInt(ScoreDTO::getNumberOfObjectives).reversed().thenComparing(GENERAL))
+				.toList();
+		return scoresSorted;
+	}
 }
