@@ -57,4 +57,11 @@ public class RankingSorter {
 				.toList();
 		return scoresSorted;
 	}
+	
+	public List<ScoreDTO> passerSort(List<ScoreDTO> scores) {
+		List<ScoreDTO> scoresSorted = scores.stream()
+				.sorted(Comparator.comparingInt(ScoreDTO::getNumberOfPasses).reversed().thenComparing(GENERAL))
+				.toList();
+		return scoresSorted;
+	}
 }
