@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,40 +52,17 @@ public class RankingServiceImplTest {
 	@InjectMocks
 	private RankingServiceImpl rankingService;
 	
+	private static final Long TOURNAMENT_ID = 1L;
+	private static final String ORCS = "Orcs";
+	private static final String GOB = "Gobelins";
+	
 	@Test
 	void shouldReturnRankingsTournament() {
-		// Arrange
-		
-		// tournoi
-		Tournament tournament = new Tournament();
-		tournament.setId(1L);
-		tournament.setNbRounds(2);
-		Optional<Tournament> optTournament = Optional.of(tournament);
-		
-		// Règles du tournoi
-		RosterCategory rosterCategory = new RosterCategory();
-		rosterCategory.setId(1L);
-		rosterCategory.setRaceName("Orcs");
-		rosterCategory.setMinus(false);
-		
-		List<RosterCategory> rosterList = new ArrayList<RosterCategory>();
-		rosterList.add(rosterCategory);
-		
-		TournamentRules tournamentRules = new TournamentRules();
-		tournamentRules.setRosterCategories(rosterList);
-		Optional<TournamentRules> opt = Optional.of(tournamentRules);
-		
-		// Créé le coach
-		Coach coach = new Coach();
-		coach.setId(1L);		
-		coach.setRace("Orcs");
-		coach.setStatus(CoachStatus.VALIDATED);
+		// Arrange		
+		Coach coach = coach(1L, ORCS);
 		
 		// Créée le coachresult
-		CoachResult coachResult1 = new CoachResult();
-		coachResult1.setId(1L);
-		coachResult1.setCoach(coach);
-		coachResult1.setResult(MatchResult.WIN);
+		CoachResult coachResult1 = coachResult(coach, MatchResult.WIN);		
 		coachResult1.setTouchdowns(2);
 		coachResult1.setCasualties(1);
 		coachResult1.setObjectives(2);
@@ -94,13 +70,14 @@ public class RankingServiceImplTest {
 		coachResult1.setPasses(2);
 		coachResult1.setFoulActions(2);
 		
+		TournamentRules rules = rules(List.of(rosterCategory(ORCS, false)));
 		// stubs
-		when(tournamentRepo.findById(tournament.getId())).thenReturn(optTournament);		
-		when(tournamentRulesRepo.findByTournamentId(tournament.getId())).thenReturn(opt);		
-		when(coachResultRepo.findAllByMatch_Round_Event_Id(tournament.getId())).thenReturn(List.of(coachResult1));
+		when(tournamentRepo.findById(TOURNAMENT_ID)).thenReturn(Optional.of(tournament()));		
+		when(tournamentRulesRepo.findByTournamentId(TOURNAMENT_ID)).thenReturn(Optional.of(rules));		
+		when(coachResultRepo.findAllByMatch_Round_Event_Id(TOURNAMENT_ID)).thenReturn(List.of(coachResult1));
 
 		// Act		
-		RankingsDTO rankings = rankingService.getRankings(tournament.getId());
+		RankingsDTO rankings = rankingService.getRankings(TOURNAMENT_ID);
 		
 		// Assert
 		assertEquals(1, rankings.getGeneralRanking().size());
@@ -110,37 +87,11 @@ public class RankingServiceImplTest {
 	
 	@Test
 	void shouldIncludeValidatedCoachWithoutResult() {
-		// Arrange
-		Tournament tournament = new Tournament();
-		tournament.setId(1L);
-		tournament.setNbRounds(2);
-		Optional<Tournament> optTournament = Optional.of(tournament);
+		// Arrange				
+		Coach coach1 = coach(1L, ORCS);		
+		Coach coach2 = coach(2L, ORCS);
 		
-		RosterCategory rosterCategory = new RosterCategory();
-		rosterCategory.setId(1L);
-		rosterCategory.setRaceName("Orcs");
-		rosterCategory.setMinus(false);
-		
-		List<RosterCategory> rosterList = new ArrayList<RosterCategory>();
-		rosterList.add(rosterCategory);
-		
-		TournamentRules tournamentRules = new TournamentRules();
-		tournamentRules.setRosterCategories(rosterList);
-		Optional<TournamentRules> opt = Optional.of(tournamentRules);
-		
-		Coach coach1 = new Coach();
-		coach1.setId(1L);		
-		coach1.setRace("Orcs");
-		coach1.setStatus(CoachStatus.VALIDATED);
-		Coach coach2 = new Coach();
-		coach2.setId(2L);
-		coach2.setRace("Orcs");
-		coach2.setStatus(CoachStatus.VALIDATED);
-
-		CoachResult coachResult1 = new CoachResult();
-		coachResult1.setId(1L);
-		coachResult1.setCoach(coach1);
-		coachResult1.setResult(MatchResult.WIN);
+		CoachResult coachResult1 = coachResult(coach1, MatchResult.WIN);		
 		coachResult1.setTouchdowns(2);
 		coachResult1.setCasualties(1);
 		coachResult1.setObjectives(2);
@@ -148,14 +99,15 @@ public class RankingServiceImplTest {
 		coachResult1.setPasses(2);
 		coachResult1.setFoulActions(2);
 		
+		TournamentRules rules = rules(List.of(rosterCategory(ORCS, false)));
 		// stubs
-		when(tournamentRepo.findById(tournament.getId())).thenReturn(optTournament);
-		when(tournamentRulesRepo.findByTournamentId(tournament.getId())).thenReturn(opt);
-		when(coachRepo.findByEventIdAndStatus(tournament.getId(), CoachStatus.VALIDATED)).thenReturn(List.of(coach1, coach2));
-		when(coachResultRepo.findAllByMatch_Round_Event_Id(tournament.getId())).thenReturn(List.of(coachResult1));
+		when(tournamentRepo.findById(TOURNAMENT_ID)).thenReturn(Optional.of(tournament()));
+		when(tournamentRulesRepo.findByTournamentId(TOURNAMENT_ID)).thenReturn(Optional.of(rules));
+		when(coachRepo.findByEventIdAndStatus(TOURNAMENT_ID, CoachStatus.VALIDATED)).thenReturn(List.of(coach1, coach2));
+		when(coachResultRepo.findAllByMatch_Round_Event_Id(TOURNAMENT_ID)).thenReturn(List.of(coachResult1));
 
 		// Act		
-		RankingsDTO rankings = rankingService.getRankings(tournament.getId());
+		RankingsDTO rankings = rankingService.getRankings(TOURNAMENT_ID);
 		
 		// Assert
 		assertEquals(2, rankings.getGeneralRanking().size());
@@ -165,47 +117,10 @@ public class RankingServiceImplTest {
 	
 	@Test
 	void shouldReturnGeneralWithoutRankWhenTournamentInProgress() {
-		// Arrange
-		Tournament tournament = new Tournament();
-		tournament.setId(1L);
-		tournament.setNbRounds(2);
-		Optional<Tournament> optTournament = Optional.of(tournament);
+		// Arrange							
+		Coach coach = coach(1L, ORCS);		
 		
-		Round round1 = new Round();
-		round1.setEvent(tournament);
-		round1.setId(1L);
-		round1.setRoundNumber(1);
-		round1.setStatus(RoundStatus.FINISHED);
-		Round round2 = new Round();
-		round2.setEvent(tournament);
-		round2.setId(2L);
-		round2.setRoundNumber(2);
-		round2.setStatus(RoundStatus.IN_PROGRESS);
-		List<Round> rounds = new ArrayList<Round>();
-		rounds.add(round1);
-		rounds.add(round2);
-		
-		RosterCategory rosterCategory = new RosterCategory();
-		rosterCategory.setId(1L);
-		rosterCategory.setRaceName("Orcs");
-		rosterCategory.setMinus(false);
-		
-		List<RosterCategory> rosterList = new ArrayList<RosterCategory>();
-		rosterList.add(rosterCategory);
-		
-		TournamentRules tournamentRules = new TournamentRules();
-		tournamentRules.setRosterCategories(rosterList);
-		Optional<TournamentRules> optRules = Optional.of(tournamentRules);
-		
-		Coach coach = new Coach();
-		coach.setId(1L);		
-		coach.setRace("Orcs");
-		coach.setStatus(CoachStatus.VALIDATED);
-		
-		CoachResult coachResult1 = new CoachResult();
-		coachResult1.setId(1L);
-		coachResult1.setCoach(coach);
-		coachResult1.setResult(MatchResult.WIN);
+		CoachResult coachResult1 = coachResult(coach, MatchResult.WIN);		
 		coachResult1.setTouchdowns(2);
 		coachResult1.setCasualties(1);
 		coachResult1.setObjectives(2);
@@ -213,13 +128,15 @@ public class RankingServiceImplTest {
 		coachResult1.setPasses(2);
 		coachResult1.setFoulActions(2);
 		
-		when(tournamentRepo.findById(tournament.getId())).thenReturn(optTournament);
-		when(roundRepo.findByEventIdOrderByRoundNumberAsc(tournament.getId())).thenReturn(rounds);
-		when(tournamentRulesRepo.findByTournamentId(tournament.getId())).thenReturn(optRules);		
-		when(coachResultRepo.findAllByMatch_Round_Event_Id(tournament.getId())).thenReturn(List.of(coachResult1));
+		TournamentRules rules = rules(List.of(rosterCategory(ORCS, false)));
+		
+		when(tournamentRepo.findById(TOURNAMENT_ID)).thenReturn(Optional.of(tournament()));
+		when(roundRepo.findByEventIdOrderByRoundNumberAsc(TOURNAMENT_ID)).thenReturn(List.of(round(1, RoundStatus.FINISHED), round(2, RoundStatus.IN_PROGRESS)));
+		when(tournamentRulesRepo.findByTournamentId(TOURNAMENT_ID)).thenReturn(Optional.of(rules));		
+		when(coachResultRepo.findAllByMatch_Round_Event_Id(TOURNAMENT_ID)).thenReturn(List.of(coachResult1));
 		
 		// Act
-		RankingsDTO rankings = rankingService.getRankings(tournament.getId());
+		RankingsDTO rankings = rankingService.getRankings(TOURNAMENT_ID);
 		
 		// Assert
 		assertEquals(0, rankings.getGeneralRanking().get(0).getRank());
@@ -228,66 +145,19 @@ public class RankingServiceImplTest {
 	
 	@Test
 	void shouldReturnFinalRankingsWhenTournamentFinished() {
-		// Arrange
-		Tournament tournament = new Tournament();
-		tournament.setId(1L);
-		tournament.setNbRounds(2);
-		Optional<Tournament> optTournament = Optional.of(tournament);
+		// Arrange						
+		Coach coach1 = coach(1L, ORCS);		
+		Coach coach2 = coach(2L, GOB);
 		
-		Round round1 = new Round();
-		round1.setEvent(tournament);
-		round1.setId(1L);
-		round1.setRoundNumber(1);
-		round1.setStatus(RoundStatus.FINISHED);
-		Round round2 = new Round();
-		round2.setEvent(tournament);
-		round2.setId(2L);
-		round2.setRoundNumber(2);
-		round2.setStatus(RoundStatus.FINISHED);
-		List<Round> rounds = new ArrayList<Round>();
-		rounds.add(round1);
-		rounds.add(round2);
-		
-		RosterCategory rosterCategory1 = new RosterCategory();
-		rosterCategory1.setId(1L);
-		rosterCategory1.setRaceName("Orcs");
-		rosterCategory1.setMinus(false);
-		RosterCategory rosterCategory2 = new RosterCategory();
-		rosterCategory2.setId(2L);
-		rosterCategory2.setRaceName("Gobelins");
-		rosterCategory2.setMinus(true);
-		
-		List<RosterCategory> rosterList = new ArrayList<RosterCategory>();
-		rosterList.add(rosterCategory1);
-		rosterList.add(rosterCategory2);
-		
-		TournamentRules tournamentRules = new TournamentRules();
-		tournamentRules.setRosterCategories(rosterList);
-		Optional<TournamentRules> opt = Optional.of(tournamentRules);
-		
-		Coach coach1 = new Coach();
-		coach1.setId(1L);		
-		coach1.setRace("Orcs");
-		coach1.setStatus(CoachStatus.VALIDATED);
-		Coach coach2 = new Coach();
-		coach2.setId(2L);
-		coach2.setRace("Gobelins");
-		coach2.setStatus(CoachStatus.VALIDATED);
-
-		CoachResult coachResult1 = new CoachResult();
-		coachResult1.setId(1L);
-		coachResult1.setCoach(coach1);
-		coachResult1.setResult(MatchResult.WIN);
+		CoachResult coachResult1 = coachResult(coach1, MatchResult.WIN);		
 		coachResult1.setTouchdowns(2);
 		coachResult1.setCasualties(1);
 		coachResult1.setObjectives(2);
 		coachResult1.setBonusObjective(true);
 		coachResult1.setPasses(2);
 		coachResult1.setFoulActions(2);
-		CoachResult coachResult2 = new CoachResult();
-		coachResult2.setId(2L);
-		coachResult2.setCoach(coach2);
-		coachResult2.setResult(MatchResult.LOSS);
+		
+		CoachResult coachResult2 = coachResult(coach2, MatchResult.LOSS);		
 		coachResult2.setTouchdowns(5);
 		coachResult2.setCasualties(5);
 		coachResult2.setObjectives(5);
@@ -295,15 +165,16 @@ public class RankingServiceImplTest {
 		coachResult2.setPasses(10);
 		coachResult2.setFoulActions(10);
 		
+		TournamentRules rules = rules(List.of(rosterCategory(ORCS, false), rosterCategory(GOB, true)));
 		// stubs
-		when(tournamentRepo.findById(tournament.getId())).thenReturn(optTournament);
-		when(roundRepo.findByEventIdOrderByRoundNumberAsc(tournament.getId())).thenReturn(rounds);
-		when(tournamentRulesRepo.findByTournamentId(tournament.getId())).thenReturn(opt);
-		when(coachRepo.findByEventIdAndStatus(tournament.getId(), CoachStatus.VALIDATED)).thenReturn(List.of(coach1, coach2));
-		when(coachResultRepo.findAllByMatch_Round_Event_Id(tournament.getId())).thenReturn(List.of(coachResult1, coachResult2));
+		when(tournamentRepo.findById(TOURNAMENT_ID)).thenReturn(Optional.of(tournament()));
+		when(roundRepo.findByEventIdOrderByRoundNumberAsc(TOURNAMENT_ID)).thenReturn(List.of(round(1, RoundStatus.FINISHED), round(2, RoundStatus.FINISHED)));
+		when(tournamentRulesRepo.findByTournamentId(TOURNAMENT_ID)).thenReturn(Optional.of(rules));
+		when(coachRepo.findByEventIdAndStatus(TOURNAMENT_ID, CoachStatus.VALIDATED)).thenReturn(List.of(coach1, coach2));
+		when(coachResultRepo.findAllByMatch_Round_Event_Id(TOURNAMENT_ID)).thenReturn(List.of(coachResult1, coachResult2));
 
 		// Act		
-		RankingsDTO rankings = rankingService.getRankings(tournament.getId());
+		RankingsDTO rankings = rankingService.getRankings(TOURNAMENT_ID);
 		
 		// Assert
 		assertEquals(1, rankings.getGeneralRanking().get(0).getRank());;
@@ -319,8 +190,50 @@ public class RankingServiceImplTest {
 	
 	@Test
 	void shouldThrowExceptionWhenTournamentNotFound() {
-		when(tournamentRepo.findById(1L)).thenReturn(Optional.empty());
+		when(tournamentRepo.findById(TOURNAMENT_ID)).thenReturn(Optional.empty());
 		
-		assertThrows(EventNotFoundException.class, () -> rankingService.getRankings(1L));
+		assertThrows(EventNotFoundException.class, () -> rankingService.getRankings(TOURNAMENT_ID));
+	}
+	
+	private Tournament tournament() {
+		Tournament tournament = new Tournament();
+		tournament.setId(TOURNAMENT_ID);
+		tournament.setNbRounds(2);
+		return tournament;
+	}
+	
+	private Round round(int number, RoundStatus status) {
+	    Round round = new Round();
+	    round.setRoundNumber(number);
+	    round.setStatus(status);
+	    return round;
+	}
+	
+	private RosterCategory rosterCategory(String race, boolean isMinus) {
+		RosterCategory rosterCategory = new RosterCategory();
+		rosterCategory.setRaceName(race);
+		rosterCategory.setMinus(isMinus);
+		return rosterCategory;
+	}
+	
+	private TournamentRules rules(List<RosterCategory> rosterCategories) {
+		TournamentRules rules = new TournamentRules();
+		rules.setRosterCategories(rosterCategories);
+		return rules;
+	}
+	
+	private Coach coach(Long id, String race) {
+		Coach coach = new Coach();
+		coach.setId(id);
+		coach.setRace(race);
+		coach.setStatus(CoachStatus.VALIDATED);
+		return coach;
+	}
+	
+	private CoachResult coachResult(Coach coach, MatchResult result) {
+		CoachResult coachResult = new CoachResult();
+		coachResult.setCoach(coach);
+		coachResult.setResult(result);
+		return coachResult;
 	}
 }
