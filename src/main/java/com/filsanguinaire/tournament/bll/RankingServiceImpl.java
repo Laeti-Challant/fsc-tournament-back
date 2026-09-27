@@ -3,6 +3,7 @@ package com.filsanguinaire.tournament.bll;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,12 +12,18 @@ import org.springframework.stereotype.Service;
 import com.filsanguinaire.tournament.bo.Coach;
 import com.filsanguinaire.tournament.bo.CoachResult;
 import com.filsanguinaire.tournament.bo.CoachStatus;
+import com.filsanguinaire.tournament.bo.Round;
+import com.filsanguinaire.tournament.bo.RoundStatus;
+import com.filsanguinaire.tournament.bo.Tournament;
 import com.filsanguinaire.tournament.bo.TournamentRules;
 import com.filsanguinaire.tournament.dal.CoachRepository;
 import com.filsanguinaire.tournament.dal.CoachResultRepository;
+import com.filsanguinaire.tournament.dal.RoundRepository;
+import com.filsanguinaire.tournament.dal.TournamentRepository;
 import com.filsanguinaire.tournament.dal.TournamentRulesRepository;
 import com.filsanguinaire.tournament.dto.ranking.RankingsDTO;
 import com.filsanguinaire.tournament.dto.ranking.ScoreDTO;
+import com.filsanguinaire.tournament.exceptions.EventNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +35,11 @@ public class RankingServiceImpl implements IRankingService {
 
 	private final CoachRepository coachRepository;
 
-	private final TournamentRulesRepository tournamentRulesRepository;	
+	private final TournamentRulesRepository tournamentRulesRepository;
+	
+	private final TournamentRepository tournamentRepository;
+	
+	private final RoundRepository roundRepository;
 
 	@Override
 	public RankingsDTO getRankings(Long tournamentId) {
@@ -57,11 +68,23 @@ public class RankingServiceImpl implements IRankingService {
 			scores.add(ScoreDTO.builder().coachId(id).build());
 		}
 		
-		// Classement
-		RankingSorter sorter = new RankingSorter();
+		// Vérification du statut des rounds
+		Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
+		int nbRound = tournament.map(Tournament::getNbRounds).orElseThrow(() -> new EventNotFoundException(tournamentId));
 		
-		return RankingsDTO	.builder()
-							.generalRanking(sorter.finalSort(scores))
-							.build();
+		List<Round> rounds = roundRepository.findByEventIdOrderByRoundNumberAsc(tournamentId);
+		
+		RankingsDTO rankings = new RankingsDTO();
+		RankingSorter sorter = new RankingSorter();
+		if (rounds.size() < nbRound 
+				|| !rounds.stream().allMatch(r -> r.getStatus().equals(RoundStatus.FINISHED))) {
+			rankings = RankingsDTO.builder().generalRanking(sorter.generalSort(scores)).build();
+		} else {
+			rankings = RankingsDTO	.builder()
+					.generalRanking(sorter.finalSort(scores))
+					.bashlordRanking(scores)
+					.build();
+		}
+		return rankings;
 	}
 }
