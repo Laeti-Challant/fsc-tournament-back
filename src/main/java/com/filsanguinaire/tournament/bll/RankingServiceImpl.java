@@ -36,60 +36,56 @@ public class RankingServiceImpl implements IRankingService {
 	private final CoachRepository coachRepository;
 
 	private final TournamentRulesRepository tournamentRulesRepository;
-	
+
 	private final TournamentRepository tournamentRepository;
-	
+
 	private final RoundRepository roundRepository;
 
 	@Override
 	public RankingsDTO getRankings(Long tournamentId) {
+		// Vérification du statut des rounds
+		Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
+		int nbRound = tournament.map(Tournament::getNbRounds)
+				.orElseThrow(() -> new EventNotFoundException(tournamentId));
+
+		List<Round> rounds = roundRepository.findByEventIdOrderByRoundNumberAsc(tournamentId);
+
 		// Préparation pour Minus
 		TournamentRules rules = tournamentRulesRepository.findByTournamentId(tournamentId).orElseThrow(
 				() -> new IllegalStateException("Aucun ruleset configuré pour le tournoi  " + tournamentId));
-		
+
 		Map<String, Boolean> isMinusByRace = new HashMap<>();
 		rules.getRosterCategories().forEach(roster -> isMinusByRace.put(roster.getRaceName(), roster.isMinus()));
-		
+
 		// Récupération de la liste des coachResult
 		List<CoachResult> results = coachResultRepository.findAllByMatch_Round_Event_Id(tournamentId);
 
 		// Agrégation
 		ScoreAggregator aggregator = new ScoreAggregator();
 		List<ScoreDTO> scores = aggregator.aggregate(results, isMinusByRace);
-		
+
 		// Pour chaque coach validé, s'il n'a pas de score lui en créer un à 0
-		List<Long> listCoachId = coachRepository.findByEventIdAndStatus(tournamentId, CoachStatus.VALIDATED).stream().map(Coach::getId).toList();
-		
+		List<Long> listCoachId = coachRepository.findByEventIdAndStatus(tournamentId, CoachStatus.VALIDATED).stream()
+				.map(Coach::getId).toList();
+
 		Set<Long> presentCoachIds = scores.stream().map(ScoreDTO::getCoachId).collect(Collectors.toSet());
-		
+
 		List<Long> missingCoachIds = listCoachId.stream().filter(id -> !presentCoachIds.contains(id)).toList();
-		
-		for (Long id: missingCoachIds) {
+
+		for (Long id : missingCoachIds) {
 			scores.add(ScoreDTO.builder().coachId(id).build());
 		}
-		
-		// Vérification du statut des rounds
-		Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
-		int nbRound = tournament.map(Tournament::getNbRounds).orElseThrow(() -> new EventNotFoundException(tournamentId));
-		
-		List<Round> rounds = roundRepository.findByEventIdOrderByRoundNumberAsc(tournamentId);
-		
-		RankingsDTO rankings = new RankingsDTO();
+
 		RankingSorter sorter = new RankingSorter();
-		if (rounds.size() < nbRound 
-				|| !rounds.stream().allMatch(r -> r.getStatus().equals(RoundStatus.FINISHED))) {
-			rankings = RankingsDTO.builder().generalRanking(sorter.generalSort(scores)).build();
-		} else {
-			rankings = RankingsDTO	.builder()
-					.generalRanking(sorter.finalSort(scores))
-					.bashlordRanking(sorter.bashlordSort(scores))
-					.minusRanking(sorter.minusSort(scores))
-					.objectiveRanking(sorter.objectiveSort(scores))
-					.scorerRanking(sorter.scorerSort(scores))
-					.passerRanking(sorter.passerSort(scores))
-					.foulerRanking(sorter.foulerSort(scores))
-					.build();
+		if (rounds.size() < nbRound || !rounds.stream().allMatch(r -> r.getStatus().equals(RoundStatus.FINISHED))) {
+			return RankingsDTO.builder().generalRanking(sorter.generalSort(scores)).build();
 		}
-		return rankings;
+		return RankingsDTO.builder().generalRanking(sorter.finalSort(scores))
+									.bashlordRanking(sorter.bashlordSort(scores))
+									.minusRanking(sorter.minusSort(scores))
+									.objectiveRanking(sorter.objectiveSort(scores))
+									.scorerRanking(sorter.scorerSort(scores))
+									.passerRanking(sorter.passerSort(scores))
+									.foulerRanking(sorter.foulerSort(scores)).build();
 	}
 }

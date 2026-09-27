@@ -2,6 +2,7 @@ package com.filsanguinaire.tournament.bll;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import com.filsanguinaire.tournament.dal.RoundRepository;
 import com.filsanguinaire.tournament.dal.TournamentRepository;
 import com.filsanguinaire.tournament.dal.TournamentRulesRepository;
 import com.filsanguinaire.tournament.dto.ranking.RankingsDTO;
+import com.filsanguinaire.tournament.exceptions.EventNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 public class RankingServiceImplTest {
@@ -312,7 +314,13 @@ public class RankingServiceImplTest {
 		assertEquals(2L, rankings.getScorerRanking().get(0).getCoachId());
 		assertEquals(2L, rankings.getObjectiveRanking().get(0).getCoachId());
 		assertEquals(2L, rankings.getPasserRanking().get(0).getCoachId());
-		assertEquals(2L, rankings.getFoulerRanking().get(0).getCoachId());
+		assertEquals(2L, rankings.getFoulerRanking().get(0).getCoachId());		
+	}
+	
+	@Test
+	void shouldThrowExceptionWhenTournamentNotFound() {
+		when(tournamentRepo.findById(1L)).thenReturn(Optional.empty());
 		
+		assertThrows(EventNotFoundException.class, () -> rankingService.getRankings(1L));
 	}
 }
