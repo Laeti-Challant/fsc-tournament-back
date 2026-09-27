@@ -82,7 +82,12 @@ public class RankingServiceImpl implements IRankingService {
 		} else {
 			rankings = RankingsDTO	.builder()
 					.generalRanking(sorter.finalSort(scores))
-					.bashlordRanking(scores)
+					.bashlordRanking(sorter.bashlordSort(scores))
+					.minusRanking(sorter.minusSort(scores))
+					.objectiveRanking(sorter.objectiveSort(scores))
+					.scorerRanking(sorter.scorerSort(scores))
+					.passerRanking(sorter.passerSort(scores))
+					.foulerRanking(sorter.foulerSort(scores))
 					.build();
 		}
 		return rankings;
