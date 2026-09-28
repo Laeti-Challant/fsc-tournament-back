@@ -76,4 +76,14 @@ public class RankingControllerTest {
 		// Assert
 		result	.andExpect(status().isNotFound());
 	}
+	
+	@Test
+	void shouldReturnBadRequestWhenTournamentIdIsInvalid() throws Exception {
+		// Act
+		ResultActions result = mockMvc.perform(get("/rankings/abc"));
+
+		// Assert
+		result	.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("paramètre invalide : tournamentId"));
+	}
 }
