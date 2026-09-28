@@ -30,6 +30,7 @@ import com.filsanguinaire.tournament.dto.auth.RegisterDTO;
 import com.filsanguinaire.tournament.exceptions.EmailAlreadyExistsException;
 import com.filsanguinaire.tournament.exceptions.PseudoAlreadyExistsException;
 import com.filsanguinaire.tournament.exceptions.UserNotFoundException;
+import com.filsanguinaire.tournament.security.CookieService;
 import com.filsanguinaire.tournament.security.JwtService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,6 +45,8 @@ public class AuthServiceImplTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private JwtService jwtService;
+    @Mock
+    private CookieService cookieService;
     @Mock
     private HttpServletResponse response;
 
@@ -97,6 +100,7 @@ public class AuthServiceImplTest {
         AuthResponseDTO result = authService.register(registerDTO, response);
 
         // THEN
+        verify(cookieService).addJwtCookie(response, "fake.jwt.token");
         assertThat(result).isNotNull();
         assertThat(result.getPseudo()).isEqualTo("LaeyaCoach");
         assertThat(result.getRole()).isEqualTo(Role.PLAYER);
@@ -147,6 +151,7 @@ public class AuthServiceImplTest {
         AuthResponseDTO result = authService.login(loginDTO, response);
 
         // THEN
+        verify(cookieService).addJwtCookie(response, "fake.jwt.token");
         assertThat(result).isNotNull();
         assertThat(result.getPseudo()).isEqualTo("LaeyaCoach");
         assertThat(result.getRole()).isEqualTo(Role.PLAYER);
