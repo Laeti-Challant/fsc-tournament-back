@@ -21,5 +21,9 @@ jobs:
       uses: gradle/actions/setup-gradle@v6
     - name: Run tests
       run: ./gradlew test
-
-
+    - name: Upload test report
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: test-report
+        path: build/reports/tests/test
