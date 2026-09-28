@@ -48,7 +48,9 @@ dependencies {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+	useJUnitPlatform { 
+		excludeTags 'seed' 
+	} 
 }
 
 tasks.withType(JavaCompile) {

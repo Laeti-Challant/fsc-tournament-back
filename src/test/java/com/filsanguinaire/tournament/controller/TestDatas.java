@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import com.filsanguinaire.tournament.dal.UserRepository;
 import com.filsanguinaire.tournament.dto.rules.TournamentRulesDTO;
 
 @SpringBootTest
+@Tag("seed")
 @TestMethodOrder(MethodOrderer.MethodName.class)
 @ActiveProfiles("local") 
 public class TestDatas {
