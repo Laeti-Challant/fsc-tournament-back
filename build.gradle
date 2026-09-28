@@ -48,9 +48,13 @@ dependencies {
 }
 
 tasks.named('test') {
-	useJUnitPlatform { 
-		excludeTags 'seed' 
-	} 
+	useJUnitPlatform {
+		excludeTags 'seed'
+	}
+	testLogging {
+		events 'passed', 'skipped', 'failed'
+		exceptionFormat 'full'
+	}
 }
 
 tasks.withType(JavaCompile) {
