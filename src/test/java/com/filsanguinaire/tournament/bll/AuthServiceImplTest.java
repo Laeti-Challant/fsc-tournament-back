@@ -199,4 +199,17 @@ public class AuthServiceImplTest {
         assertThatThrownBy(() -> authService.login(loginDTO, response))
                 .isInstanceOf(DisabledException.class);
     }
+    
+	// =====================
+	// TESTS LOGOUT
+	// =====================
+    @Test
+    @DisplayName("Logout — succès : cookie JWT supprimé")
+    void logout_success() {
+    	// WHEN
+    	authService.logout(response);
+    	
+    	// THEN
+    	verify(cookieService).removeJwtCookie(response);
+    }
 }
