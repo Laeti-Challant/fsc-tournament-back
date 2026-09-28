@@ -59,7 +59,7 @@ public class SecurityConfig {
 					    // Lecture publique des tournaments (current, coaches list)
 					    .requestMatchers(HttpMethod.GET, "/tournaments/**").permitAll()
 					    // Lecture publique des classements
-					    .requestMatchers(HttpMethod.GET, "/standings/**").permitAll()
+					    .requestMatchers(HttpMethod.GET, "/rankings/**").permitAll()
 					    // Tout le reste nécessite authentification
 					    .anyRequest().authenticated()
 					)
