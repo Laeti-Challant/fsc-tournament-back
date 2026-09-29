@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.filsanguinaire.tournament.bo.Coach;
 import com.filsanguinaire.tournament.bo.CoachResult;
@@ -42,6 +43,7 @@ public class RankingServiceImpl implements IRankingService {
 	private final RoundRepository roundRepository;
 
 	@Override
+	@Transactional(readOnly = true)
 	public RankingsDTO getRankings(Long tournamentId) {
 		// Vérification du statut des rounds
 		Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
