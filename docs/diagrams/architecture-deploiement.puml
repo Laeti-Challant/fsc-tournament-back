@@ -1,0 +1,98 @@
+@startuml "architecture-deploiement"
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam handwritten false
+
+
+skinparam node {
+  BackgroundColor #F5F5F5
+  BorderColor #D31027
+  FontColor #1A1A1B
+  FontStyle bold
+}
+
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #9A0B1E
+  FontColor #1A1A1B
+}
+
+skinparam database {
+  BackgroundColor #FFFFFF
+  BorderColor #9A0B1E
+  FontColor #1A1A1B
+}
+
+skinparam arrow {
+  Color #9A0B1E
+  FontColor #9A0B1E
+  FontSize 11
+}
+
+skinparam rectangle {
+  BackgroundColor #F5F5F5
+  BorderColor #D31027
+  FontColor #1A1A1B
+  FontStyle bold
+}
+
+skinparam note {
+  BackgroundColor #FFF8F8
+  BorderColor #D31027
+  FontColor #1A1A1B
+}
+
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #555555
+  FontColor #1A1A1B
+}
+
+' =====================
+' ACTEUR
+' =====================
+actor "Navigateur\n(Coach / Admin)" as Browser #F4F4F4
+
+' =====================
+' VERCEL
+' =====================
+node "Vercel" {
+  component "Angular 21\nTypeScript / TailwindCSS / DaisyUI" as Angular
+}
+
+' =====================
+' RENDER
+' =====================
+node "Render" {
+  component "Docker Container" as Docker {
+    component "Spring Boot 4.0.5\nJava 21 / Spring Security / JPA" as SpringBoot
+  }
+}
+
+' =====================
+' SUPABASE
+' =====================
+node "Supabase" {
+  database "PostgreSQL" as DB
+}
+
+' =====================
+' RELATIONS
+' =====================
+Browser -up-> Angular : HTTPS\n(HTML/JS/CSS)
+
+Browser -right-> SpringBoot : HTTPS\nREST / JSON\nJWT\n(cookie HttpOnly)
+
+SpringBoot -down-> DB : JDBC \nSSL/TLS
+
+' =====================
+' NOTE SECURITE
+' =====================
+note bottom of SpringBoot
+  Spring Security : routes par rôle (PLAYER / ADMIN)
+  BCrypt : hachage des mots de passe
+  CORS : origines autorisées configurées
+  Headers HTTP : CSP, X-Frame-Options, X-Content-Type-Options
+end note
+
+@enduml
