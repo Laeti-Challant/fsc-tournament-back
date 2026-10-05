@@ -19,6 +19,7 @@ CREATE TABLE tournament (
     address     VARCHAR(150),
     postal_code VARCHAR(5),
     city        VARCHAR(50),
+    featured    BOOLEAN NOT NULL DEFAULT false,
     FOREIGN KEY (id) REFERENCES event(id)
 );
 
@@ -44,7 +45,7 @@ CREATE TABLE coach (
     roster_status VARCHAR(20) NOT NULL DEFAULT 'NOT_SUBMITTED',
     roster_link   VARCHAR(500),
     substitute    BOOLEAN NOT NULL DEFAULT false,
-    user_id       BIGINT NOT NULL,
+    user_id       BIGINT,
     event_id      BIGINT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (event_id) REFERENCES event(id),
@@ -89,10 +90,10 @@ CREATE TABLE coach_result (
 CREATE TABLE tournament_rules (
     id                    BIGSERIAL NOT NULL PRIMARY KEY,
     budget_po             INTEGER NOT NULL,
-    psp_pool              SMALLINT NOT NULL,
-    max_skills_per_player SMALLINT NOT NULL,
+    psp_pool              INTEGER NOT NULL,
+    max_skills_per_player INTEGER NOT NULL,
     resurrection_mode     BOOLEAN NOT NULL DEFAULT true,
-    mogette_psp_value     SMALLINT NOT NULL,
+    mogette_psp_value     INTEGER NOT NULL,
     mogette_po_value      INTEGER NOT NULL,
     notes_text            TEXT,
     roster_text           TEXT,
@@ -103,8 +104,8 @@ CREATE TABLE tournament_rules (
 CREATE TABLE allowed_inducement (
     id       BIGSERIAL NOT NULL PRIMARY KEY,
     name     VARCHAR(100) NOT NULL,
-    min_qty  SMALLINT NOT NULL DEFAULT 0,
-    max_qty  SMALLINT NOT NULL,
+    min_qty  INTEGER NOT NULL DEFAULT 0,
+    max_qty  INTEGER NOT NULL,
     rules_id BIGINT NOT NULL,
     FOREIGN KEY (rules_id) REFERENCES tournament_rules(id)
 );
@@ -113,7 +114,7 @@ CREATE TABLE roster_category (
     id             BIGSERIAL NOT NULL PRIMARY KEY,
     race_name      VARCHAR(50) NOT NULL,
     is_minus       BOOLEAN NOT NULL,
-    category_value SMALLINT NOT NULL,
+    category_value INTEGER NOT NULL,
     rules_id       BIGINT NOT NULL,
     FOREIGN KEY (rules_id) REFERENCES tournament_rules(id)
 );
