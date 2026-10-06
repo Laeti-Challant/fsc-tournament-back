@@ -106,3 +106,40 @@ docker compose up -d
 ### Les secrets
 
 Ces secrets sont importants car ils préservent l'intégrité de l'application et sa sécurité. Les fichiers `.env` et `application-local.properties` sont systématiquement exclus du dépôt par le `.gitignore`. Pour la mise en production, les secrets sont à enregistrer dans les paramètres du service sur Render, onglet Environment.
+
+## 4. Construction de l'image
+
+Render ne propose pas d'environnement Java natif. L'application est donc livrée sous forme d'image Docker, construite à partir du `Dockerfile` à la racine du dépôt. Ce fichier se décompose en deux étapes.
+
+### Étape 1 : le build
+
+- Elle part d'une image contenant Gradle 8.14 et un JDK 21.
+- Elle copie d'abord les fichiers de build (`build.gradle`, `settings.gradle`), puis télécharge les dépendances.
+- Elle copie ensuite le code source et construit le `.jar` exécutable avec `gradle bootJar`, sans processus en arrière-plan (`--no-daemon`) et sans lancer les tests (`-x test`).
+
+### Étape 2 : le runtime
+
+Dans une nouvelle image, une distribution Linux Alpine avec un JRE 21, elle copie uniquement le `.jar` construit à l'étape 1, sans le code source ni les outils de build. Le conteneur démarre ensuite l'application avec le profil `prod`.
+
+### Pourquoi ce découpage
+
+- **Taille** : l'image finale ne contient que le JRE et le `.jar`.
+- **Sécurité** : ni code source, ni compilateur, ni Gradle en production. Moins d'outils dans l'image, c'est moins de prise pour un attaquant.
+
+### Le cache des couches
+
+Chaque instruction `COPY` ou `RUN` crée une couche, que Docker garde en cache. Au build suivant, une couche inchangée est réutilisée, mais dès qu'une couche change, toutes les suivantes sont reconstruites. Les fichiers de build sont donc copiés avant le code source : une modification du code ne provoque pas un nouveau téléchargement des dépendances.
+
+### Pourquoi les tests ne sont pas lancés
+
+- Le code qui arrive sur `main` a déjà été testé : la branche est protégée, et une pull request ne peut être mergée que si la CI est verte (voir section 7).
+- Les tests d'intégration utilisent Testcontainers, qui a besoin de Docker. Docker n'est pas disponible pendant la construction de l'image.
+
+### Construire l'image en local
+
+```bash
+docker build -t fsc-tournament-back .
+docker images fsc-tournament-back
+```
+
+On obtient une image de 131 Mo compressée (ce qui est téléchargé), soit 405 Mo une fois décompressée sur le disque.
