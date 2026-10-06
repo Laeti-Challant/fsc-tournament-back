@@ -12,7 +12,27 @@ Voici le schéma d'organisation de l'application :
 - le navigateur effectue ensuite lui-même les appels vers l'API fsc-tournament-back, hébergée sur Render dans un conteneur Docker ;
 - l'API lit et enregistre les données dans une base PostgreSQL hébergée par Supabase, via une connexion chiffrée (SSL/TLS).
 
-| Élément | URL publique | Dépôt |
-|---|---|---|
-| Interface | https://fsc-tournament-front.vercel.app/ | [fsc-tournament-front](https://github.com/Laeti-Challant/fsc-tournament-front) |
-| API | https://fsc-tournament-back.onrender.com/api | [fsc-tournament-back](https://github.com/Laeti-Challant/fsc-tournament-back) |
+| Élément   | URL publique                                 | Dépôt                                                                          |
+| --------- | -------------------------------------------- | ------------------------------------------------------------------------------ |
+| Interface | https://fsc-tournament-front.vercel.app/     | [fsc-tournament-front](https://github.com/Laeti-Challant/fsc-tournament-front) |
+| API       | https://fsc-tournament-back.onrender.com/api | [fsc-tournament-back](https://github.com/Laeti-Challant/fsc-tournament-back)   |
+
+## 2. Prérequis
+
+### Poste de développement
+
+Pour installer l'application en local :
+
+- Git, pour récupérer le dépôt
+- JDK 21, pour compiler et exécuter l'API. La version 21 de Java est nécessaire à Gradle, qui sert à construire l'application Java Spring Boot.
+- Docker, pour la base de données et lancer les tests d'intégration qui utilisent Testcontainers
+
+Gradle n'est pas à installer : il est téléchargé par `gradlew` avec la version nécessaire.
+
+### Services en ligne
+
+Pour reproduire le déploiement en production :
+
+- GitHub, pour héberger le dépôt et faire fonctionner la CI
+- Render, pour héberger l'API en déployant via GitHub
+- Supabase, pour héberger la base de données PostgreSQL
