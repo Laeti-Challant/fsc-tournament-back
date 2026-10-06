@@ -36,3 +36,73 @@ Pour reproduire le déploiement en production :
 - GitHub, pour héberger le dépôt et faire fonctionner la CI
 - Render, pour héberger l'API en déployant via GitHub
 - Supabase, pour héberger la base de données PostgreSQL
+
+## 3. Configuration
+
+### Les profils
+
+- Le fichier `application.properties` est chargé systématiquement par l'application.
+- Le fichier `application-local.properties` le surcharge pour lancer l'application en local.
+- Le fichier `application-prod.properties` le surcharge pour le lancement en production, avec des variables d'environnement pour préserver les secrets, à renseigner dans Render.
+
+#### Activation des profils
+
+En production, le `Dockerfile` active le bon profil. En local, il faut lancer l'application avec l'argument suivant :
+`--args='--spring.profiles.active=local'`
+
+#### Pour lancer l'application en local
+
+1. Copier le fichier `.env.example` en `.env`, puis compléter le nom de la base, l'utilisateur et le mot de passe.
+
+2. Créer le fichier `src/main/resources/application-local.properties` avec le contenu suivant, en reprenant les valeurs du `.env` :
+
+```properties
+jwt.secret=clé à générer, voir ci-dessous
+
+spring.datasource.url=jdbc:postgresql://localhost:5433/nom_de_la_base
+spring.datasource.username=nom_de_l_utilisateur
+spring.datasource.password=mot_de_passe
+
+app.cors.allowed-origins=http://localhost:4200
+app.cookie.secure=false
+app.cookie.same-site=Lax
+```
+
+La clé JWT doit être encodée en Base64 et faire au moins 256 bits. Pour la générer en local :
+
+```bash
+openssl rand -base64 32
+```
+
+3. Démarrer la base de données :
+
+```bash
+docker compose up -d
+```
+
+4. Lancer l'application via Gradle :
+
+```bash
+./gradlew bootRun --args='--spring.profiles.active=local'
+```
+
+5. L'URL d'appel à l'API est la suivante : `http://localhost:8080/filsanguinairecholetais`
+
+6. Pour arrêter l'application, faire un `Ctrl + C`.
+
+### Les variables d'environnement
+
+| Variable             | Rôle                                              | Exemple                                 | Secret |
+| -------------------- | ------------------------------------------------- | --------------------------------------- | ------ |
+| POSTGRES_HOST        | hébergeur de la base de données                   | fourni par Supabase                     | Non    |
+| POSTGRES_PORT        | port de la base de données                        | 5432                                    | Non    |
+| POSTGRES_DB          | nom de la base de données chez l'hébergeur        | postgres                                | Non    |
+| POSTGRES_USER        | utilisateur de la base de données                 | -                                       | Oui    |
+| POSTGRES_PASSWORD    | mot de passe de la base de données                | -                                       | Oui    |
+| JWT_SECRET           | clé secrète pour JWT, en Base64, 256 bits minimum | -                                       | Oui    |
+| CORS_ALLOWED_ORIGINS | URL des clients autorisés à appeler l'API         | https://fsc-tournament-front.vercel.app | Non    |
+| PORT                 | port d'écoute de l'API                            | 8080 par défaut, fourni par Render      | Non    |
+
+### Les secrets
+
+Ces secrets sont importants car ils préservent l'intégrité de l'application et sa sécurité. Les fichiers `.env` et `application-local.properties` sont systématiquement exclus du dépôt par le `.gitignore`. Pour la mise en production, les secrets sont à enregistrer dans les paramètres du service sur Render, onglet Environment.
