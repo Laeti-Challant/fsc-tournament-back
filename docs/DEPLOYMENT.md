@@ -146,6 +146,88 @@ On obtient une image de 131 Mo compressée (ce qui est téléchargé), soit 405 
 
 ## 5. Base de données
 
+La base de production est une base PostgreSQL hébergée par [Supabase](https://supabase.com/), en offre gratuite. Elle doit être créée, avec son schéma, avant le premier déploiement de l'API.
+
+### Création du projet Supabase
+
+Après la création de son compte, cliquer sur **New project**, puis renseigner :
+
+- **GitHub** (optionnel) : non utilisé. Cette intégration gère les migrations depuis un dossier `supabase/` dans le dépôt, alors que le schéma de ce projet est fourni par `init-db/schema.sql`.
+- **Project name** : le nom du projet, par exemple `fsc-tournament-db`.
+- **Database password** : le mot de passe de la base. Il peut être généré par Supabase. Il faut le copier tout de suite : il ne se réaffiche jamais (il peut seulement être réinitialisé dans **Settings > Database**). Il deviendra la variable `POSTGRES_PASSWORD`.
+- **Region** : une région européenne, pour que les données restent hébergées dans l'Union européenne (RGPD). Choisir de préférence une région proche de celle de Render (Frankfurt), pour limiter la latence entre l'API et la base.
+- **Security** :
+  - décocher **Enable Data API** ;
+  - décocher **Automatically expose new tables** ;
+  - laisser **Enable automatic RLS** décoché.
+
+L'API Spring Boot accède à la base en JDBC. La Data API de Supabase, qui exposerait les tables en HTTP, est désactivée pour ne pas ouvrir une autre voie d'accès aux données. Le RLS (Row Level Security) protège surtout les accès par cette Data API : il n'apporterait rien ici, l'API se connectant avec le propriétaire des tables.
+
+Cliquer enfin sur **Create new project**. La base démarre en quelques minutes.
+
+### Création du schéma
+
+1. Ouvrir le **SQL Editor**.
+2. Coller tout le contenu de `init-db/schema.sql`.
+3. Cliquer sur **Run**. Supabase propose alors d'activer le RLS : choisir l'option **Without RLS**, pour la raison expliquée ci-dessus.
+4. Le résultat attendu est `Success. No rows returned` : une création de table ne renvoie aucune ligne.
+5. Vérifier dans le **Table Editor** que les 11 tables sont créées.
+
+### Paramètres de connexion
+
+Supabase propose plusieurs modes de connexion. Il faut choisir **Session pooler** :
+
+| Mode              | Utilisable ici | Raison                                                                                                     |
+| ----------------- | -------------- | ---------------------------------------------------------------------------------------------------------- |
+| Direct connection | Non            | uniquement en IPv6, alors que Render ne sort qu'en IPv4 : l'API ne pourrait pas se connecter              |
+| Session pooler    | **Oui**        | accessible en IPv4, gratuit, une vraie session par connexion, adaptée au pool de connexions de Spring Boot |
+| Transaction pooler | Non           | partage les connexions entre transactions, incompatible avec les requêtes préparées d'Hibernate            |
+
+L'add-on IPv4 de Supabase rendrait la connexion directe utilisable, mais il est payant.
+
+Relever ensuite les valeurs à reporter dans Render (voir section 6) :
+
+| Variable          | Valeur                                                        |
+| ----------------- | ------------------------------------------------------------- |
+| POSTGRES_HOST     | `aws-0-<région>.pooler.supabase.com`                          |
+| POSTGRES_PORT     | `5432`                                                        |
+| POSTGRES_DB       | `postgres`                                                    |
+| POSTGRES_USER     | `postgres.<identifiant-du-projet>`, et non `postgres` seul    |
+| POSTGRES_PASSWORD | le mot de passe choisi à la création du projet                |
+
+La connexion est chiffrée : l'URL JDBC de `application-prod.properties` impose `sslmode=require`.
+
+### Validation du schéma au démarrage
+
+En production, `spring.jpa.hibernate.ddl-auto` vaut `validate` : au démarrage, Hibernate compare les tables de la base aux entités Java. Au moindre écart (table, colonne ou type manquant), l'API refuse de démarrer.
+
+Ce réglage est plus sûr que `update`, qui modifierait lui-même le schéma de production sans contrôle ni trace. Avec `validate`, une incohérence est détectée au déploiement, et non par un utilisateur.
+
+### Évolution du schéma
+
+Aujourd'hui, le schéma n'est pas versionné par un outil de migration :
+
+- `init-db/schema.sql` décrit le schéma complet. Il a été réaligné sur les entités le 05/10/2026, après la découverte de 7 écarts, puis vérifié dans un conteneur Docker éphémère ;
+- le schéma de production a été modifié à la main dans Supabase par le passé, sans trace dans le dépôt.
+
+Toute évolution d'une entité impose donc de mettre à jour `schema.sql` et d'appliquer la modification à la main dans Supabase avant de déployer, faute de quoi `validate` bloquera le démarrage.
+
+Perspective : adopter **Flyway**, qui applique au démarrage des scripts de migration versionnés et numérotés, et garde dans la base l'historique de ceux déjà joués. Chaque évolution du schéma serait alors tracée dans le dépôt, relue en pull request et appliquée automatiquement.
+
+### Sauvegarde et restauration
+
+Les scripts du dossier `scripts/` concernent **uniquement la base locale** : ils passent par `docker exec` sur le conteneur `fsc_tournament_db`.
+
+```bash
+# Sauvegarde, dans ./backups/backup_<date>.sql
+./scripts/backup-db.sh
+
+# Restauration d'une sauvegarde
+./scripts/restore-db.sh backups/backup_20261007_210000.sql
+```
+
+Ils ne sauvegardent pas la base de production. Pour celle-ci, une sauvegarde manuelle reste possible avec `pg_dump` via le Session pooler. Les sauvegardes proposées par Supabase dépendent de l'offre souscrite (voir section 9).
+
 ## 6. Déploiement sur Render
 
 La base de données doit exister, avec son schéma, avant le premier déploiement : sinon l'API refuse de démarrer (voir section 5).
