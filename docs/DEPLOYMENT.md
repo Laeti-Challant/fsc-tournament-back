@@ -143,3 +143,45 @@ docker images fsc-tournament-back
 ```
 
 On obtient une image de 131 Mo compressée (ce qui est téléchargé), soit 405 Mo une fois décompressée sur le disque.
+
+## 5. Base de données
+
+## 6. Déploiement sur Render
+
+La base de données doit exister, avec son schéma, avant le premier déploiement : sinon l'API refuse de démarrer (voir section 5).
+
+### Création du service
+
+Sur [Render](https://render.com/), après la création de son compte (plus rapide avec GitHub), il faut créer un nouveau **Web Service**, autoriser Render à accéder à GitHub, puis sélectionner le dépôt `fsc-tournament-back`.
+
+Sur la page suivante, il faut choisir **Docker** comme **Language** et vérifier que c'est bien la branche `main` qui est sélectionnée dans **Branch**. Le chemin du `Dockerfile` (`./Dockerfile`) et le dossier de construction (`.`, la racine du dépôt) gardent leurs valeurs par défaut. Il faut également sélectionner la région de déploiement **Frankfurt (EU Central)**, pour que les données restent dans l'Union européenne, et enfin l'offre gratuite (**Free**).
+
+### Les variables d'environnement
+
+Sur la même page, une section permet de saisir les variables d'environnement. Ajouter chaque variable du tableau de la section 3 avec le bouton **+ Add Environment Variable**, sauf `PORT`, qui est fourni par Render. Le profil `prod`, qui lit ces variables, est activé par le `Dockerfile` (voir section 3).
+
+### Déclenchement du déploiement
+
+Dans la section **Advanced**, il faut régler **Auto-Deploy** sur **After CI Checks Pass**, puis cliquer sur **Deploy Web Service**. Render construit alors l'image à l'aide du `Dockerfile` et démarre le conteneur, ce qui lance l'API.
+
+Ce premier déploiement part immédiatement. Ensuite, chaque push sur `main`, donc chaque merge de pull request, déclenche un nouveau déploiement, mais Render attend que la CI soit verte sur ce commit avant de le lancer (voir section 7). Ce réglage reste modifiable dans **Settings**, rubrique **Deploy**.
+
+### Vérification après déploiement
+
+L'API de production répond à l'adresse `https://fsc-tournament-back.onrender.com/api`. En production, le chemin de base est `/api` (défini dans `application-prod.properties`), et non `/filsanguinairecholetais` comme en local.
+
+La route des classements est publique en lecture : les requêtes suivantes ne demandent aucune connexion.
+
+| Requête                   | Attendu                                       | Ce que ça prouve                                                                 |
+| ------------------------- | --------------------------------------------- | -------------------------------------------------------------------------------- |
+| `GET /api/rankings/1`     | 200 + classement en JSON                      | l'API fonctionne, et la connexion à Supabase aussi : le classement est lu en base |
+| `GET /api/rankings/99999` | 404 Not Found                                 | la gestion des erreurs fonctionne                                                |
+| `GET /api/rankings/abc`   | 400 + message `paramètre invalide : tournamentId` | une entrée invalide ne provoque ni erreur 500 ni fuite d'informations techniques |
+
+Avec `curl`, l'option `-i` affiche le code de retour :
+
+```bash
+curl -i https://fsc-tournament-back.onrender.com/api/rankings/abc
+```
+
+En offre gratuite, Render met le service en veille après une période d'inactivité : la première requête peut prendre plus de 2 minutes (voir section 9).
