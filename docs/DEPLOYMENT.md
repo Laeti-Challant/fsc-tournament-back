@@ -353,3 +353,23 @@ Le retour en arrière ne concerne que **le code**. La base de données ne revien
 - si une version a modifié le **schéma**, l'ancienne version de l'application ne correspond plus à ce schéma, et `validate` bloquera son démarrage. Il faudrait alors annuler la modification du schéma à la main dans Supabase.
 
 Les évolutions du schéma ne sont pas encore gérées par un outil de migration ([voir section 5, « Évolution du schéma »](#évolution-du-schéma)). Cette limite est reprise en section 9.
+
+## 9. Limites connues
+
+| Limite                             | Constat                                                                                  | Conséquence                                                                                              | Piste d'amélioration                                                                                                                                     |
+| ---------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mise en veille sur Render          | En offre gratuite, le service s'endort après une période d'inactivité                    | La première requête peut prendre **plus de 2 minutes**                                                   | **Acceptable aujourd'hui**, faute d'utilisateurs réels. Correction directe : l'offre payante de Render, sans mise en veille                              |
+| Couverture de tests                | **27 %** du code est couvert, les classes testées l'étant à 100 %, sans exclusion        | Le code non couvert n'est pas protégé contre les **régressions** par la CI                               | Étendre les tests en priorité à la logique métier non couverte                                                                                           |
+| Schéma sans outil de migration     | La base de production a été modifiée à la main, sans trace dans le dépôt                 | Chaque évolution du schéma doit être appliquée **à la main** dans Supabase, avec un risque d'oubli       | Adopter **Flyway** : migrations versionnées dans le dépôt, relues en pull request et appliquées au démarrage (voir section 5)                             |
+| Pas de sauvegarde de la production | L'offre gratuite de Supabase n'inclut **aucune sauvegarde**                              | En cas d'incident, **perte définitive des données**. Seul un `pg_dump` manuel protège la base            | Planifier un `pg_dump` par une GitHub Action (déclencheur `schedule`), stocké hors de Supabase, ou passer à l'offre payante, qui inclut des sauvegardes |
+| Mise en pause de Supabase          | L'offre gratuite met en pause un projet dont la base reçoit trop peu de requêtes sur 7 jours               | La base devient inaccessible : l'API ne peut plus lire ni écrire de données jusqu'à sa relance manuelle | Contournement actuel : le site est consulté chaque jour, ce qui maintient le projet actif. Piste : automatiser cette consultation par une GitHub Action planifiée qui interroge l'API, ou passer à l'offre payante |
+| Version de Gradle du `Dockerfile`  | L'image de build utilise `gradle:8.14`, alors que le wrapper du projet est en **9.4.1**  | L'image n'est pas construite avec la même version de Gradle qu'en local et en CI : risque d'écart de comportement | Correctif prévu : construire avec le wrapper (`./gradlew`) sur une image JDK 21 sans Gradle                                                             |
+
+### Perspective d'hébergement
+
+L'instance déployée sert aujourd'hui de démonstration, sans utilisateurs réels. Une évolution de l'application vers un **SaaS** de gestion de tournois, destiné à plusieurs associations locales, est à l'étude.
+
+Si des associations se montrent intéressées, l'hébergement pourrait migrer vers un **serveur privé chez Hetzner** (entreprise allemande, serveurs dans l'Union européenne) :
+
+- **avantages** : plus de mise en veille, sauvegardes maîtrisées, et un hébergeur européen, là où Render et Supabase reposent sur des infrastructures américaines soumises au Cloud Act ;
+- **contrepartie** : l'administration du serveur (mises à jour de sécurité, pare-feu, certificat HTTPS, sauvegardes, supervision) serait alors entièrement à la charge du projet.
