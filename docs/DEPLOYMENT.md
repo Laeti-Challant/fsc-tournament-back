@@ -267,3 +267,49 @@ curl -i https://fsc-tournament-back.onrender.com/api/rankings/abc
 ```
 
 En offre gratuite, Render met le service en veille après une période d'inactivité : la première requête peut prendre plus de 2 minutes (voir section 9).
+
+## 7. Intégration continue
+
+### Le rôle de la CI
+
+L'intégration continue (CI) consiste à **vérifier automatiquement chaque modification du code** avant qu'elle rejoigne la branche principale. Dans ce projet, elle compile l'application et **lance toute la suite de tests** (unitaires et d'intégration) sur une machine neutre, et non sur le poste de la développeuse.
+
+Elle détecte ainsi les **régressions** : une modification qui casse un comportement déjà testé est repérée avant le merge. Cette protection vaut pour ce que les tests couvrent, soit 27 % du code à ce jour (voir section 9).
+
+Le workflow est décrit dans `.github/workflows/ci.yml` et s'exécute sur **GitHub Actions**.
+
+### Les déclencheurs
+
+Le projet suit le **GitHub Flow** : chaque développement se fait sur une branche dédiée, puis rejoint `main` par une **pull request**.
+
+La CI se déclenche dans deux cas :
+
+| Événement                     | Rôle                                                              |
+| ----------------------------- | ----------------------------------------------------------------- |
+| Pull request vers `main`      | vérifier la branche **avant** le merge                            |
+| Push sur `main`               | vérifier le résultat **après** le merge, avant le déploiement     |
+
+### Les étapes du job `test`
+
+Le job s'exécute sur une machine virtuelle Ubuntu fournie par GitHub (`ubuntu-latest`) et enchaîne les étapes suivantes :
+
+1. **Récupération du code** (`actions/checkout`) ;
+2. **Installation du JDK 21** (`actions/setup-java`, distribution Temurin) ;
+3. **Configuration de Gradle** (`gradle/actions/setup-gradle`), qui met en cache les dépendances d'une exécution à l'autre ;
+4. **Lancement des tests** avec `./gradlew test`. Les tests d'intégration démarrent une vraie base PostgreSQL grâce à **Testcontainers** : Docker est déjà installé sur la machine virtuelle, aucune configuration supplémentaire n'est nécessaire ;
+5. **Publication des rapports** : le rapport de tests et le rapport de couverture JaCoCo.
+
+### Les rapports
+
+Les deux rapports sont publiés en **artifacts**, téléchargeables depuis la page de l'exécution sur GitHub (onglet **Actions**).
+
+Ils sont publiés **même en cas d'échec**, grâce à la condition `if: always()`. Sans elle, l'échec des tests arrêterait le job avant la publication, et le rapport manquerait précisément quand il est utile : il permet de voir tout de suite quel test a échoué et pourquoi.
+
+### Les barrières
+
+La CI s'insère dans deux barrières, qui forment une chaîne complète de **CI/CD** :
+
+1. **Avant le merge** : la branche `main` est protégée par le ruleset `protect-main`. Une pull request ne peut être mergée que si le check `test` est vert, et le push direct ou forcé sur `main` est bloqué.
+2. **Avant le déploiement** : Render est réglé sur **After CI Checks Pass** (voir section 6). Après un merge, il attend que la CI soit verte sur le commit de `main` avant de déployer.
+
+Ainsi, **aucun code non testé n'arrive en production**.
