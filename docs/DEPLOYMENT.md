@@ -175,25 +175,25 @@ Cliquer enfin sur **Create new project**. La base démarre en quelques minutes.
 
 ### Paramètres de connexion
 
-Supabase propose plusieurs modes de connexion. Il faut choisir **Session pooler** :
+Supabase propose plusieurs modes de connexion, regroupés dans l'onglet **Direct** du bouton **Connect**. Il faut choisir **Session pooler** :
 
-| Mode              | Utilisable ici | Raison                                                                                                     |
-| ----------------- | -------------- | ---------------------------------------------------------------------------------------------------------- |
-| Direct connection | Non            | uniquement en IPv6, alors que Render ne sort qu'en IPv4 : l'API ne pourrait pas se connecter              |
-| Session pooler    | **Oui**        | accessible en IPv4, gratuit, une vraie session par connexion, adaptée au pool de connexions de Spring Boot |
-| Transaction pooler | Non           | partage les connexions entre transactions, incompatible avec les requêtes préparées d'Hibernate            |
+| Mode               | Utilisable ici | Raison                                                                                                     |
+| ------------------ | -------------- | ---------------------------------------------------------------------------------------------------------- |
+| Direct connection  | Non            | uniquement en IPv6, alors que Render ne sort qu'en IPv4 : l'API ne pourrait pas se connecter               |
+| Session pooler     | **Oui**        | accessible en IPv4, gratuit, une vraie session par connexion, adaptée au pool de connexions de Spring Boot |
+| Transaction pooler | Non            | partage les connexions entre transactions, incompatible avec les requêtes préparées d'Hibernate            |
 
 L'add-on IPv4 de Supabase rendrait la connexion directe utilisable, mais il est payant.
 
 Relever ensuite les valeurs à reporter dans Render (voir section 6) :
 
-| Variable          | Valeur                                                        |
-| ----------------- | ------------------------------------------------------------- |
-| POSTGRES_HOST     | `aws-0-<région>.pooler.supabase.com`                          |
-| POSTGRES_PORT     | `5432`                                                        |
-| POSTGRES_DB       | `postgres`                                                    |
-| POSTGRES_USER     | `postgres.<identifiant-du-projet>`, et non `postgres` seul    |
-| POSTGRES_PASSWORD | le mot de passe choisi à la création du projet                |
+| Variable          | Valeur                                                     |
+| ----------------- | ---------------------------------------------------------- |
+| POSTGRES_HOST     | `aws-0-<région>.pooler.supabase.com`                       |
+| POSTGRES_PORT     | `5432`                                                     |
+| POSTGRES_DB       | `postgres`                                                 |
+| POSTGRES_USER     | `postgres.<identifiant-du-projet>`, et non `postgres` seul |
+| POSTGRES_PASSWORD | le mot de passe choisi à la création du projet             |
 
 La connexion est chiffrée : l'URL JDBC de `application-prod.properties` impose `sslmode=require`.
 
@@ -254,11 +254,11 @@ L'API de production répond à l'adresse `https://fsc-tournament-back.onrender.c
 
 La route des classements est publique en lecture : les requêtes suivantes ne demandent aucune connexion.
 
-| Requête                   | Attendu                                       | Ce que ça prouve                                                                 |
-| ------------------------- | --------------------------------------------- | -------------------------------------------------------------------------------- |
-| `GET /api/rankings/1`     | 200 + classement en JSON                      | l'API fonctionne, et la connexion à Supabase aussi : le classement est lu en base |
-| `GET /api/rankings/99999` | 404 Not Found                                 | la gestion des erreurs fonctionne                                                |
-| `GET /api/rankings/abc`   | 400 + message `paramètre invalide : tournamentId` | une entrée invalide ne provoque ni erreur 500 ni fuite d'informations techniques |
+| Requête                   | Attendu                                           | Ce que ça prouve                                                                  |
+| ------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `GET /api/rankings/1`     | 200 + classement en JSON                          | l'API fonctionne, et la connexion à Supabase aussi : le classement est lu en base |
+| `GET /api/rankings/99999` | 404 Not Found                                     | la gestion des erreurs fonctionne                                                 |
+| `GET /api/rankings/abc`   | 400 + message `paramètre invalide : tournamentId` | une entrée invalide ne provoque ni erreur 500 ni fuite d'informations techniques  |
 
 Avec `curl`, l'option `-i` affiche le code de retour :
 
