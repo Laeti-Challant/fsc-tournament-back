@@ -284,10 +284,10 @@ Le projet suit le **GitHub Flow** : chaque développement se fait sur une branch
 
 La CI se déclenche dans deux cas :
 
-| Événement                     | Rôle                                                              |
-| ----------------------------- | ----------------------------------------------------------------- |
-| Pull request vers `main`      | vérifier la branche **avant** le merge                            |
-| Push sur `main`               | vérifier le résultat **après** le merge, avant le déploiement     |
+| Événement                | Rôle                                                          |
+| ------------------------ | ------------------------------------------------------------- |
+| Pull request vers `main` | vérifier la branche **avant** le merge                        |
+| Push sur `main`          | vérifier le résultat **après** le merge, avant le déploiement |
 
 ### Les étapes du job `test`
 
@@ -313,3 +313,43 @@ La CI s'insère dans deux barrières, qui forment une chaîne complète de **CI/
 2. **Avant le déploiement** : Render est réglé sur **After CI Checks Pass** (voir section 6). Après un merge, il attend que la CI soit verte sur le commit de `main` avant de déployer.
 
 Ainsi, **aucun code non testé n'arrive en production**.
+
+## 8. Mise à jour et retour en arrière
+
+### Mettre à jour l'application
+
+Le projet suit le **GitHub Flow** : chaque évolution est développée sur une branche dédiée, puis rejoint `main` par une **pull request** une fois terminée.
+
+Une mise à jour suit donc toujours le même cycle :
+
+1. ouverture d'une pull request vers `main` : la CI lance la suite de tests, et le merge reste bloqué tant qu'elle n'est pas verte (voir [section 7](#7-intégration-continue)) ;
+2. merge de la pull request : la CI s'exécute à nouveau, cette fois sur le commit de `main` ;
+3. une fois cette CI verte, Render construit la nouvelle image et la déploie (voir [section 6](#6-déploiement-sur-render)).
+
+Render ne lance pas les tests lui-même : il attend le résultat de la CI de GitHub, puis construit l'image en sautant les tests (voir [section 4](#4-construction-de-limage)).
+
+Une fois le déploiement terminé, refaire [les vérifications de la section 6](#vérification-après-déploiement).
+
+### Revenir à une version précédente
+
+En cas de problème en production, deux mécanismes se complètent :
+
+| Mécanisme              | Où     | Effet                                                                                      |
+| ---------------------- | ------ | ------------------------------------------------------------------------------------------ |
+| **Rollback**           | Render | **immédiat** : redéploie l'image d'un déploiement précédent, sans reconstruire             |
+| **`git revert`** en PR | GitHub | **durable** : annule le commit fautif sur `main`, en repassant par la CI et le déploiement |
+
+Pour un rollback : ouvrir le service sur Render, aller dans **Deploy**, choisir un déploiement précédent réussi, puis cliquer sur **Rollback**.
+
+Render **désactive alors l'Auto-Deploy** (un message le signale avant confirmation) : aucun nouveau merge ne sera déployé automatiquement tant qu'il n'est pas réactivé.
+
+Le rollback seul ne suffit pas : le commit fautif reste sur `main`, et le redéploierait dès la réactivation de l'Auto-Deploy. Il faut donc ensuite corriger `main`, par un `git revert` ou un correctif, en pull request, puis réactiver l'Auto-Deploy (**Settings**, rubrique **Deploy**, réglage **After CI Checks Pass**).
+
+### La base de données
+
+Le retour en arrière ne concerne que **le code**. La base de données ne revient pas en arrière avec lui :
+
+- les **données** écrites depuis le déploiement fautif restent en base ;
+- si une version a modifié le **schéma**, l'ancienne version de l'application ne correspond plus à ce schéma, et `validate` bloquera son démarrage. Il faudrait alors annuler la modification du schéma à la main dans Supabase.
+
+Les évolutions du schéma ne sont pas encore gérées par un outil de migration ([voir section 5, « Évolution du schéma »](#évolution-du-schéma)). Cette limite est reprise en section 9.
