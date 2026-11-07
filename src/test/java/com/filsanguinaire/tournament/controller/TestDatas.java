@@ -16,12 +16,16 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.filsanguinaire.tournament.bll.IRulesService;
 import com.filsanguinaire.tournament.bo.AllowedInducement;
+import com.filsanguinaire.tournament.bo.Coach;
+import com.filsanguinaire.tournament.bo.CoachStatus;
 import com.filsanguinaire.tournament.bo.EventStatus;
 import com.filsanguinaire.tournament.bo.Role;
 import com.filsanguinaire.tournament.bo.RosterCategory;
+import com.filsanguinaire.tournament.bo.RosterStatus;
 import com.filsanguinaire.tournament.bo.Tournament;
 import com.filsanguinaire.tournament.bo.TournamentRules;
 import com.filsanguinaire.tournament.bo.User;
+import com.filsanguinaire.tournament.dal.CoachRepository;
 import com.filsanguinaire.tournament.dal.TournamentRepository;
 import com.filsanguinaire.tournament.dal.TournamentRulesRepository;
 import com.filsanguinaire.tournament.dal.UserRepository;
@@ -278,6 +282,39 @@ public class TestDatas {
         assertThat(cloned).isNotNull();
         assertThat(cloned.getAllowedInducements()).hasSize(14);
         assertThat(cloned.getRosterCategories()).hasSize(30);
+    }
+
+    // =========================================================================
+    // TEST 06 — PARTICIPANTS DU CHOLETBOWL IX (24 coachs validés)
+    // =========================================================================
+
+    @Autowired
+    private CoachRepository coachRepository;
+
+    private static final List<String> RACES = List.of(
+            "Nains", "Orcs", "Skavens", "Humains", "Elfes Noirs", "Nurgle",
+            "Hommes-Lézards", "Morts-Vivants");
+
+    @Test
+    void test06_InsertParticipantsIX() {
+        final Tournament tournamentIX = tournamentRepository.findAll().stream()
+                .filter(e -> e.getName().equals("CholetBowl IX"))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Event CholetBowl IX introuvable"));
+
+        for (int i = 1; i <= 24; i++) {
+            coachRepository.save(Coach.builder()
+                    .coachPseudo("Coach" + i)
+                    .teamName("Équipe " + i)
+                    .race(RACES.get(i % RACES.size()))
+                    .status(CoachStatus.VALIDATED)
+                    .rosterStatus(RosterStatus.APPROVED)
+                    .event(tournamentIX)
+                    .build());
+        }
+
+        assertThat(coachRepository.findByEventIdAndStatus(tournamentIX.getId(), CoachStatus.VALIDATED))
+                .hasSize(24);
     }
 
     // =========================================================================
